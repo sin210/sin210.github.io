@@ -373,45 +373,75 @@ kubectl apply -f deploy.yaml -n <span class="pl-c1">test</span></pre></div>
 <li>关键控制点：分支触发规则、质量门禁（检查不通过终止）、制品版本唯一、部署后验证+回滚机制；</li>
 <li>工具选择：中小团队优先用GitLab CI/GitHub Actions（与代码仓库集成），复杂场景用Jenkins。</li>
 </ol>
-<p>完整口述流程（带工具 + 步骤）<br>
-我理解的 CI/CD 自动化流水线，一共分为 8 个阶段，每个阶段都有对应的工具，全程自动化：</p>
-<p>代码提交与触发<br>
-开发人员写完代码，通过 Git 提交到代码仓库，比如 GitLab、GitHub、Gitee。<br>
+<hr>
+<h2>完整口述流程（带工具 + 步骤）</h2>
+<p>我理解的 CI/CD 自动化流水线，一共分为 <strong>8 个阶段</strong>，每个阶段都有对应的工具，全程自动化：</p>
+<ol>
+<li>
+<p><strong>代码提交与触发</strong><br>
+开发人员写完代码，通过 <strong>Git</strong> 提交到代码仓库，比如 <strong>GitLab、GitHub、Gitee</strong>。<br>
 只要代码一合并或推送，就会自动触发流水线，不需要人工操作。</p>
-<p>拉取代码与环境准备<br>
-流水线开始后，会通过 Git 自动拉取最新代码。<br>
-然后在构建机上准备环境，比如安装 JDK、Node.js、Maven、Python 等依赖，<br>
-这一步一般用 Jenkins、GitLab CI、GitHub Actions 来调度执行。</p>
-<p>代码质量与安全扫描<br>
+</li>
+<li>
+<p><strong>拉取代码与环境准备</strong><br>
+流水线开始后，会通过 <strong>Git</strong> 自动拉取最新代码。<br>
+然后在构建机上准备环境，比如安装 <strong>JDK、Node.js、Maven、Python</strong> 等依赖，<br>
+这一步一般用 <strong>Jenkins、GitLab CI、GitHub Actions</strong> 来调度执行。</p>
+</li>
+<li>
+<p><strong>代码质量与安全扫描</strong><br>
 代码拉下来后，先做质量检查：</p>
-<p>用 SonarQube 做代码规范、bug、坏味道检测<br>
-用 依赖检查工具 扫描第三方包漏洞<br>
-不通过的话，流水线直接终止，不让问题进入下一步。<br>
-编译构建与打包<br>
+<ul>
+<li>用 <strong>SonarQube</strong> 做代码规范、bug、坏味道检测</li>
+<li>用 <strong>依赖检查工具</strong> 扫描第三方包漏洞<br>
+不通过的话，流水线直接终止，不让问题进入下一步。</li>
+</ul>
+</li>
+<li>
+<p><strong>编译构建与打包</strong><br>
 检查通过后开始构建：</p>
-<p>Java 项目用 Maven / Gradle 打成 Jar 包<br>
-前端用 npm / yarn 构建出 dist 静态包<br>
-然后用 Docker 构建成镜像，生成可直接运行的容器镜像。<br>
-自动化测试<br>
+<ul>
+<li>Java 项目用 <strong>Maven / Gradle</strong> 打成 Jar 包</li>
+<li>前端用 <strong>npm / yarn</strong> 构建出 dist 静态包</li>
+<li>然后用 <strong>Docker</strong> 构建成镜像，生成可直接运行的容器镜像。</li>
+</ul>
+</li>
+<li>
+<p><strong>自动化测试</strong><br>
 构建完成后自动跑测试：</p>
-<p>单元测试用 JUnit、Pytest<br>
-接口测试用 Postman、JMeter<br>
-测试不通过，流水线失败，保证上线质量。<br>
-制品上传（仓库存储）<br>
+<ul>
+<li>单元测试用 <strong>JUnit、Pytest</strong></li>
+<li>接口测试用 <strong>Postman、JMeter</strong><br>
+测试不通过，流水线失败，保证上线质量。</li>
+</ul>
+</li>
+<li>
+<p><strong>制品上传（仓库存储）</strong><br>
 测试通过后，把 Docker 镜像推送到镜像仓库：</p>
-<p>常用 Harbor、阿里云镜像仓库、Docker Hub<br>
-每个镜像都带唯一版本号，方便回滚。<br>
-自动部署发布<br>
+<ul>
+<li>常用 <strong>Harbor、阿里云镜像仓库、Docker Hub</strong><br>
+每个镜像都带唯一版本号，方便回滚。</li>
+</ul>
+</li>
+<li>
+<p><strong>自动部署发布</strong><br>
 部署一般分环境：测试环境 → 预发 → 生产。</p>
-<p>部署工具用 Jenkins、GitLab CI、ArgoCD<br>
-如果是 K8s 环境，就用 kubectl 执行部署文件<br>
-生产环境一般会加人工审批，确认无误再发布。<br>
-部署验证与回滚<br>
+<ul>
+<li>部署工具用 <strong>Jenkins、GitLab CI、ArgoCD</strong></li>
+<li>如果是 <strong>K8s 环境</strong>，就用 <strong>kubectl</strong> 执行部署文件<br>
+生产环境一般会加<strong>人工审批</strong>，确认无误再发布。</li>
+</ul>
+</li>
+<li>
+<p><strong>部署验证与回滚</strong><br>
 部署完成后，自动检查服务是否正常启动、接口是否可用。<br>
-如果有问题，自动回滚到上一个稳定版本，保证业务不中断。<br>
-同时用 Prometheus + Grafana 监控服务运行状态。</p>
-<p>最后总结一句（面试官超爱）<br>
-整个 CI/CD 流水线，从代码提交到构建、测试、部署、监控全部自动化，用 Git、Jenkins、Docker、K8s、Sonar、Harbor 这些工具配合，大大提高发布效率，减少人为失误，保证线上稳定</p></div>
+如果有问题，<strong>自动回滚</strong>到上一个稳定版本，保证业务不中断。<br>
+同时用 <strong>Prometheus + Grafana</strong> 监控服务运行状态。</p>
+</li>
+</ol>
+<hr>
+<h1>最后总结一句（面试官超爱）</h1>
+<p><strong>整个 CI/CD 流水线，从代码提交到构建、测试、部署、监控全部自动化，用 Git、Jenkins、Docker、K8s、Sonar、Harbor 这些工具配合，大大提高发布效率，减少人为失误，保证线上稳定。</strong></p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>

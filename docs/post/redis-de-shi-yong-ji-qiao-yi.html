@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/264126132?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="### 一、Redis 是什么？
+Redis（Remote Dictionary Server）是一款**开源的、高性能的键值对（Key-Value）内存数据库**，同时支持数据持久化（把内存数据写到硬盘），常用来做缓存、分布式锁、消息队列、排行榜等场景。">
+<meta property="og:title" content="redis的使用技巧一">
+<meta property="og:description" content="### 一、Redis 是什么？
+Redis（Remote Dictionary Server）是一款**开源的、高性能的键值对（Key-Value）内存数据库**，同时支持数据持久化（把内存数据写到硬盘），常用来做缓存、分布式锁、消息队列、排行榜等场景。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://sin210.github.io/post/redis-de-shi-yong-ji-qiao-yi.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/264126132?v=4&size=64">
+<title>redis的使用技巧一</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+.copy-feedback {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    color: var(--color-fg-on-emphasis);
+    background-color: var(--color-fg-muted);
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">redis的使用技巧一</h1>
+<div class="title-right">
+    <a href="https://sin210.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/sin210/sin210.github.io/issues/5" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h3>一、Redis 是什么？</h3>
+<p>Redis（Remote Dictionary Server）是一款<strong>开源的、高性能的键值对（Key-Value）内存数据库</strong>，同时支持数据持久化（把内存数据写到硬盘），常用来做缓存、分布式锁、消息队列、排行榜等场景。</p>
+<p>核心特点：</p>
+<ul>
+<li>基于内存操作，速度极快（读写性能可达 10 万+/秒）；</li>
+<li>支持多种数据类型（字符串、哈希、列表、集合、有序集合等）；</li>
+<li>支持持久化（RDB/AOF 两种方式）；</li>
+<li>支持主从复制、集群，易扩展；</li>
+<li>单线程模型（避免线程切换开销），但通过 I/O 多路复用保证高性能。</li>
+</ul>
+<h3>二、快速安装（以 Linux 为例，Windows 建议用 WSL 或 Redis 桌面版）</h3>
+<h4>1. 安装步骤</h4>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 1. 安装依赖</span>
+yum install -y gcc gcc-c++ make
+
+<span class="pl-c"><span class="pl-c">#</span> 2. 下载并解压 Redis（以 7.2.4 版本为例）</span>
+wget https://download.redis.io/releases/redis-7.2.4.tar.gz
+tar -zxvf redis-7.2.4.tar.gz
+<span class="pl-c1">cd</span> redis-7.2.4
+
+<span class="pl-c"><span class="pl-c">#</span> 3. 编译安装</span>
+make
+make install PREFIX=/usr/local/redis  <span class="pl-c"><span class="pl-c">#</span> 指定安装目录</span>
+
+<span class="pl-c"><span class="pl-c">#</span> 4. 复制配置文件（方便修改）</span>
+cp redis.conf /usr/local/redis/conf/
+
+<span class="pl-c"><span class="pl-c">#</span> 5. 启动 Redis（先修改配置，允许远程访问+后台运行）</span>
+vim /usr/local/redis/conf/redis.conf
+<span class="pl-c"><span class="pl-c">#</span> 修改以下配置：</span>
+<span class="pl-c"><span class="pl-c">#</span> bind 127.0.0.1 → 注释掉（允许所有IP访问）</span>
+<span class="pl-c"><span class="pl-c">#</span> protected-mode yes → no（关闭保护模式）</span>
+<span class="pl-c"><span class="pl-c">#</span> daemonize no → yes（后台运行）</span>
+
+<span class="pl-c"><span class="pl-c">#</span> 6. 启动 Redis 服务</span>
+/usr/local/redis/bin/redis-server /usr/local/redis/conf/redis.conf
+
+<span class="pl-c"><span class="pl-c">#</span> 7. 进入 Redis 客户端</span>
+/usr/local/redis/bin/redis-cli</pre></div>
+<h4>2. 验证安装</h4>
+<p>客户端输入 <code class="notranslate">ping</code>，返回 <code class="notranslate">PONG</code> 说明启动成功：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">127.0.0.1:<span class="pl-k">6379&gt;</span> ping
+PONG</pre></div>
+<h3>三、核心基础：数据类型与常用命令</h3>
+<p>Redis 的核心是<strong>键（Key）</strong> + <strong>值（Value）</strong>，Value 支持多种数据类型，先掌握最常用的 5 种：</p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>数据类型</th>
+<th>作用</th>
+<th>典型场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>String</td>
+<td>字符串/数字</td>
+<td>缓存、计数器、分布式ID</td>
+</tr>
+<tr>
+<td>Hash</td>
+<td>键值对集合</td>
+<td>缓存对象（用户、商品）</td>
+</tr>
+<tr>
+<td>List</td>
+<td>有序列表（双向链表）</td>
+<td>消息队列、最新列表</td>
+</tr>
+<tr>
+<td>Set</td>
+<td>无序不重复集合</td>
+<td>去重、交集/并集</td>
+</tr>
+<tr>
+<td>ZSet</td>
+<td>有序不重复集合</td>
+<td>排行榜、计分系统</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<h4>1. 通用命令（所有数据类型都能用）</h4>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 查看所有键（支持模糊匹配，如 keys user*）</span>
+keys <span class="pl-k">*</span>
+<span class="pl-c"><span class="pl-c">#</span> 判断键是否存在（返回 1 存在，0 不存在）</span>
+exists name
+<span class="pl-c"><span class="pl-c">#</span> 删除键（返回删除的数量）</span>
+del name
+<span class="pl-c"><span class="pl-c">#</span> 设置键的过期时间（单位：秒，expireat 用时间戳）</span>
+expire name 60
+<span class="pl-c"><span class="pl-c">#</span> 查看键的剩余过期时间（-1 永不过期，-2 已过期）</span>
+ttl name
+<span class="pl-c"><span class="pl-c">#</span> 查看值的类型（string/hash/list/set/zset）</span>
+<span class="pl-c1">type</span> name</pre></div>
+<h4>2. 常用数据类型命令示例</h4>
+<h5>（1）String（最基础）</h5>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 设置值（setnx：不存在才设置，分布式锁常用）</span>
+<span class="pl-c1">set</span> name <span class="pl-s"><span class="pl-pds">"</span>zhangsan<span class="pl-pds">"</span></span>
+<span class="pl-c"><span class="pl-c">#</span> 获取值</span>
+get name  <span class="pl-c"><span class="pl-c">#</span> 返回 "zhangsan"</span>
+<span class="pl-c"><span class="pl-c">#</span> 数值递增（incrby 指定步长，decr/decrby 递减）</span>
+<span class="pl-c1">set</span> age 18
+incr age  <span class="pl-c"><span class="pl-c">#</span> age 变为 19</span>
+incrby age 5  <span class="pl-c"><span class="pl-c">#</span> age 变为 24</span>
+<span class="pl-c"><span class="pl-c">#</span> 追加字符串</span>
+append name <span class="pl-s"><span class="pl-pds">"</span> - 北京<span class="pl-pds">"</span></span>  <span class="pl-c"><span class="pl-c">#</span> name 变为 "zhangsan - 北京"</span>
+<span class="pl-c"><span class="pl-c">#</span> 获取字符串长度</span>
+strlen name  <span class="pl-c"><span class="pl-c">#</span> 返回 13</span></pre></div>
+<h5>（2）Hash（适合存对象）</h5>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 设置单个字段</span>
+hset user:1 name <span class="pl-s"><span class="pl-pds">"</span>lisi<span class="pl-pds">"</span></span> age 20
+<span class="pl-c"><span class="pl-c">#</span> 设置多个字段</span>
+hmset user:1 gender <span class="pl-s"><span class="pl-pds">"</span>male<span class="pl-pds">"</span></span> city <span class="pl-s"><span class="pl-pds">"</span>Shanghai<span class="pl-pds">"</span></span>
+<span class="pl-c"><span class="pl-c">#</span> 获取单个字段</span>
+hget user:1 name  <span class="pl-c"><span class="pl-c">#</span> 返回 "lisi"</span>
+<span class="pl-c"><span class="pl-c">#</span> 获取多个字段</span>
+hmget user:1 name age  <span class="pl-c"><span class="pl-c">#</span> 返回 ["lisi", "20"]</span>
+<span class="pl-c"><span class="pl-c">#</span> 获取所有字段和值</span>
+hgetall user:1  <span class="pl-c"><span class="pl-c">#</span> 返回 ["name","lisi","age","20",...]</span>
+<span class="pl-c"><span class="pl-c">#</span> 获取所有字段名</span>
+hkeys user:1  <span class="pl-c"><span class="pl-c">#</span> 返回 ["name","age","gender","city"]</span>
+<span class="pl-c"><span class="pl-c">#</span> 获取所有值</span>
+hvals user:1  <span class="pl-c"><span class="pl-c">#</span> 返回 ["lisi","20","male","Shanghai"]</span>
+<span class="pl-c"><span class="pl-c">#</span> 删除字段</span>
+hdel user:1 city</pre></div>
+<h5>（3）List（有序、可重复）</h5>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 从列表左侧/右侧添加元素</span>
+lpush list1 a b c  <span class="pl-c"><span class="pl-c">#</span> 列表：c b a</span>
+rpush list1 d e    <span class="pl-c"><span class="pl-c">#</span> 列表：c b a d e</span>
+<span class="pl-c"><span class="pl-c">#</span> 从左侧/右侧弹出元素（弹出后元素从列表删除）</span>
+lpop list1  <span class="pl-c"><span class="pl-c">#</span> 返回 c，列表变为：b a d e</span>
+rpop list1  <span class="pl-c"><span class="pl-c">#</span> 返回 e，列表变为：b a d</span>
+<span class="pl-c"><span class="pl-c">#</span> 获取列表长度</span>
+llen list1  <span class="pl-c"><span class="pl-c">#</span> 返回 3</span>
+<span class="pl-c"><span class="pl-c">#</span> 获取指定范围元素（0 是第一个，-1 是最后一个）</span>
+lrange list1 0 -1  <span class="pl-c"><span class="pl-c">#</span> 返回 ["b","a","d"]</span></pre></div>
+<h5>（4）Set（无序、不重复）</h5>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 添加元素</span>
+sadd set1 1 2 3 3  <span class="pl-c"><span class="pl-c">#</span> 只添加 1、2、3（去重）</span>
+<span class="pl-c"><span class="pl-c">#</span> 获取所有元素</span>
+smembers set1  <span class="pl-c"><span class="pl-c">#</span> 返回 [1,2,3]</span>
+<span class="pl-c"><span class="pl-c">#</span> 判断元素是否在集合中</span>
+sismember set1 2  <span class="pl-c"><span class="pl-c">#</span> 返回 1</span>
+<span class="pl-c"><span class="pl-c">#</span> 求交集（共同元素）</span>
+sadd set2 2 3 4
+sinter set1 set2  <span class="pl-c"><span class="pl-c">#</span> 返回 [2,3]</span>
+<span class="pl-c"><span class="pl-c">#</span> 求并集</span>
+sunion set1 set2  <span class="pl-c"><span class="pl-c">#</span> 返回 [1,2,3,4]</span>
+<span class="pl-c"><span class="pl-c">#</span> 删除元素</span>
+srem set1 1  <span class="pl-c"><span class="pl-c">#</span> 集合变为 [2,3]</span></pre></div>
+<h5>（5）ZSet（有序、不重复，通过分数排序）</h5>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 添加元素（格式：zadd 键 分数 元素）</span>
+zadd rank 100 <span class="pl-s"><span class="pl-pds">"</span>zhangsan<span class="pl-pds">"</span></span> 90 <span class="pl-s"><span class="pl-pds">"</span>lisi<span class="pl-pds">"</span></span> 95 <span class="pl-s"><span class="pl-pds">"</span>wangwu<span class="pl-pds">"</span></span>
+<span class="pl-c"><span class="pl-c">#</span> 获取元素分数</span>
+zscore rank <span class="pl-s"><span class="pl-pds">"</span>lisi<span class="pl-pds">"</span></span>  <span class="pl-c"><span class="pl-c">#</span> 返回 90</span>
+<span class="pl-c"><span class="pl-c">#</span> 按分数升序/降序取元素（withscores 显示分数）</span>
+zrange rank 0 -1 withscores  <span class="pl-c"><span class="pl-c">#</span> 升序：lisi(90)、wangwu(95)、zhangsan(100)</span>
+zrevrange rank 0 -1 withscores  <span class="pl-c"><span class="pl-c">#</span> 降序：zhangsan(100)、wangwu(95)、lisi(90)</span>
+<span class="pl-c"><span class="pl-c">#</span> 按分数范围取元素（90&lt;=分数&lt;=95）</span>
+zrangebyscore rank 90 95 withscores  <span class="pl-c"><span class="pl-c">#</span> 返回 lisi(90)、wangwu(95)</span></pre></div>
+<h3>四、简单实战：用 Python 操作 Redis</h3>
+<p>学习 Redis 最终要结合编程语言使用，这里以 Python 为例（需安装 <code class="notranslate">redis</code> 库）：</p>
+<h4>1. 安装依赖</h4>
+<div class="highlight highlight-source-shell"><pre class="notranslate">pip install redis</pre></div>
+<h4>2. 示例代码</h4>
+<div class="highlight highlight-source-python"><pre class="notranslate"><span class="pl-k">import</span> <span class="pl-s1">redis</span>
+
+<span class="pl-c"># 连接 Redis（host 填你的 Redis 地址，port 默认为 6379，无密码则不加 password）</span>
+<span class="pl-s1">r</span> <span class="pl-c1">=</span> <span class="pl-s1">redis</span>.<span class="pl-c1">Redis</span>(
+    <span class="pl-s1">host</span><span class="pl-c1">=</span><span class="pl-s">'127.0.0.1'</span>,
+    <span class="pl-s1">port</span><span class="pl-c1">=</span><span class="pl-c1">6379</span>,
+    <span class="pl-s1">db</span><span class="pl-c1">=</span><span class="pl-c1">0</span>,  <span class="pl-c"># 使用第 0 个数据库（Redis 默认有 16 个，0-15）</span>
+    <span class="pl-s1">decode_responses</span><span class="pl-c1">=</span><span class="pl-c1">True</span>  <span class="pl-c"># 自动将返回值从 bytes 转为字符串</span>
+)
+
+<span class="pl-c"># 1. 操作 String</span>
+<span class="pl-s1">r</span>.<span class="pl-c1">set</span>(<span class="pl-s">"username"</span>, <span class="pl-s">"python_user"</span>)
+<span class="pl-en">print</span>(<span class="pl-s">"String 获取："</span>, <span class="pl-s1">r</span>.<span class="pl-c1">get</span>(<span class="pl-s">"username"</span>))  <span class="pl-c"># 输出：python_user</span>
+<span class="pl-s1">r</span>.<span class="pl-c1">incr</span>(<span class="pl-s">"visit_count"</span>)  <span class="pl-c"># 计数器+1</span>
+<span class="pl-en">print</span>(<span class="pl-s">"计数器："</span>, <span class="pl-s1">r</span>.<span class="pl-c1">get</span>(<span class="pl-s">"visit_count"</span>))  <span class="pl-c"># 输出：1</span>
+
+<span class="pl-c"># 2. 操作 Hash</span>
+<span class="pl-s1">r</span>.<span class="pl-c1">hset</span>(<span class="pl-s">"user:2"</span>, <span class="pl-s1">mapping</span><span class="pl-c1">=</span>{<span class="pl-s">"name"</span>: <span class="pl-s">"redis_user"</span>, <span class="pl-s">"age"</span>: <span class="pl-c1">25</span>})
+<span class="pl-en">print</span>(<span class="pl-s">"Hash 获取："</span>, <span class="pl-s1">r</span>.<span class="pl-c1">hgetall</span>(<span class="pl-s">"user:2"</span>))  <span class="pl-c"># 输出：{'name': 'redis_user', 'age': '25'}</span>
+
+<span class="pl-c"># 3. 操作 ZSet（排行榜）</span>
+<span class="pl-s1">r</span>.<span class="pl-c1">zadd</span>(<span class="pl-s">"score_rank"</span>, {<span class="pl-s">"小明"</span>: <span class="pl-c1">88</span>, <span class="pl-s">"小红"</span>: <span class="pl-c1">95</span>, <span class="pl-s">"小刚"</span>: <span class="pl-c1">90</span>})
+<span class="pl-c"># 获取前三名（降序）</span>
+<span class="pl-s1">top3</span> <span class="pl-c1">=</span> <span class="pl-s1">r</span>.<span class="pl-c1">zrevrange</span>(<span class="pl-s">"score_rank"</span>, <span class="pl-c1">0</span>, <span class="pl-c1">2</span>, <span class="pl-s1">withscores</span><span class="pl-c1">=</span><span class="pl-c1">True</span>)
+<span class="pl-en">print</span>(<span class="pl-s">"排行榜前三名："</span>, <span class="pl-s1">top3</span>)  <span class="pl-c"># 输出：[('小红', 95.0), ('小刚', 90.0), ('小明', 88.0)]</span></pre></div>
+<h3>五、Redis 持久化（入门级理解）</h3>
+<p>Redis 数据默认存在内存中，重启后会丢失，持久化就是把数据存到硬盘：</p>
+<ul>
+<li><strong>RDB</strong>：定时快照（比如每 5 分钟/改了 1000 次），生成二进制文件，恢复快，适合备份；</li>
+<li><strong>AOF</strong>：记录所有写命令（比如 set、hset），重启时重新执行命令恢复，数据更完整，适合高可用。</li>
+</ul>
+<p>新手默认开启 RDB 即可，无需手动修改配置。</p>
+<hr>
+<h3>总结</h3>
+<ol>
+<li>Redis 是高性能内存键值数据库，核心优势是<strong>快</strong>，支持多种数据类型和持久化；</li>
+<li>入门先掌握<strong>通用命令</strong> + <strong>5 种核心数据类型</strong>的常用操作，理解每种类型的适用场景；</li>
+<li>结合编程语言（如 Python）实操，能快速把 Redis 用在实际项目中（比如缓存、排行榜）。</li>
+</ol></div>
+<div style="font-size:small;margin-top:8px;float:right;"></div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://sin210.github.io">Frostnova</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行 "+diffDay+" 天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z', 'copy': 'M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z', 'check': 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.disabled=true;
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","sin210/sin210.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const createClipboardHTML = (codeContent, additionalClasses = '') => `
+        <pre class="notranslate"><code class="notranslate">${codeContent}</code></pre>
+        <div class="clipboard-container position-absolute right-0 top-0 ${additionalClasses}">
+            <clipboard-copy class="ClipboardButton btn m-2 p-0" role="button" style="display: inherit;">
+                <svg height="16" width="16" class="octicon octicon-copy m-2"><path d="${IconList["copy"]}"></path></svg>
+                <svg height="16" width="16" class="octicon octicon-check color-fg-success m-2 d-none"><path d="${IconList["check"]}"></path></svg>
+            </clipboard-copy>
+            <div class="copy-feedback">Copied!</div>
+        </div>
+    `;
+
+    const handleCodeElements = (selector = '') => {
+        document.querySelectorAll(selector).forEach(codeElement => {
+            const codeContent = codeElement.innerHTML;
+            const newStructure = document.createElement('div');
+            newStructure.className = 'snippet-clipboard-content position-relative overflow-auto';
+            newStructure.innerHTML = createClipboardHTML(codeContent);
+
+            const parentElement = codeElement.parentElement;
+            if (selector.includes('highlight')) {
+                parentElement.insertBefore(newStructure, codeElement.nextSibling);
+                parentElement.removeChild(codeElement);
+            } else {
+                parentElement.parentElement.replaceChild(newStructure, parentElement);
+            }
+        });
+    };
+
+    handleCodeElements('pre.notranslate > code.notranslate');
+    handleCodeElements('div.highlight > pre.notranslate');
+
+    let currentFeedback = null;
+    document.querySelectorAll('clipboard-copy').forEach(copyButton => {
+        copyButton.addEventListener('click', () => {
+            const codeContent = copyButton.closest('.snippet-clipboard-content').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyIcon = copyButton.querySelector('.octicon-copy');
+            const checkIcon = copyButton.querySelector('.octicon-check');
+            const copyFeedback = copyButton.nextElementSibling;
+
+            if (currentFeedback && currentFeedback !== copyFeedback) {currentFeedback.style.display = 'none';}
+            currentFeedback = copyFeedback;
+
+            copyIcon.classList.add('d-none');
+            checkIcon.classList.remove('d-none');
+            copyFeedback.style.display = 'block';
+            copyButton.style.borderColor = 'var(--color-success-fg)';
+
+            setTimeout(() => {
+                copyIcon.classList.remove('d-none');
+                checkIcon.classList.add('d-none');
+                copyFeedback.style.display = 'none';
+                copyButton.style.borderColor = '';
+            }, 2000);
+        });
+    });
+});
+
+</script>
+<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekTOC.js'></script><script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>
+
+</html>

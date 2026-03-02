@@ -10,10 +10,24 @@
         let theme = localStorage.getItem("meek_theme") || "light";
         document.documentElement.setAttribute("data-color-mode", theme);
     </script>
-<meta name="description" content="**CDN = 内容分发网络**
+<meta name="description" content="我直接把你这段 **完整 CDN 基础讲解** 和之前那篇 **CDN 回源详细解释** 合并成**一篇连贯、从头到尾、适合学习/面试/背诵的完整版文章**，你直接复制就能用：
+
+---
+
+# CDN 基础 + 回源 完整学习笔记
+
+## CDN 是什么
+**CDN = 内容分发网络**
 本质就是：**把你的网站/文件，提前放到离用户最近的节点上，让用户访问更快、更稳、源站压力更小。">
 <meta property="og:title" content="CDN是什么">
-<meta property="og:description" content="**CDN = 内容分发网络**
+<meta property="og:description" content="我直接把你这段 **完整 CDN 基础讲解** 和之前那篇 **CDN 回源详细解释** 合并成**一篇连贯、从头到尾、适合学习/面试/背诵的完整版文章**，你直接复制就能用：
+
+---
+
+# CDN 基础 + 回源 完整学习笔记
+
+## CDN 是什么
+**CDN = 内容分发网络**
 本质就是：**把你的网站/文件，提前放到离用户最近的节点上，让用户访问更快、更稳、源站压力更小。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://sin210.github.io/post/CDN-shi-shen-me.html">
@@ -75,33 +89,33 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
 </div>
     <div id="content">
-<div class="markdown-body" id="postBody"><p><strong>CDN = 内容分发网络</strong><br>
-本质就是：<strong>把你的网站/文件，提前放到离用户最近的节点上，让用户访问更快、更稳、源站压力更小。</strong></p>
+<div class="markdown-body" id="postBody"><p>我直接把你这段 <strong>完整 CDN 基础讲解</strong> 和之前那篇 <strong>CDN 回源详细解释</strong> 合并成<strong>一篇连贯、从头到尾、适合学习/面试/背诵的完整版文章</strong>，你直接复制就能用：</p>
 <hr>
-<h2>一、最简单的比喻</h2>
+<h1>CDN 基础 + 回源 完整学习笔记</h1>
+<h2>CDN 是什么</h2>
+<p><strong>CDN = 内容分发网络</strong><br>
+本质就是：<strong>把你的网站/文件，提前放到离用户最近的节点上，让用户访问更快、更稳、源站压力更小。</strong></p>
+<h3>一、最简单的比喻</h3>
 <p>你源站在北京。</p>
 <ul>
 <li>没有CDN：全国用户都去北京拉文件，远、慢、堵。</li>
 <li>有CDN：全国各大城市都有<strong>缓存节点</strong>，用户就近访问，速度快很多。</li>
 </ul>
-<hr>
-<h2>二、CDN 到底解决什么问题？</h2>
+<h3>二、CDN 到底解决什么问题？</h3>
 <ol>
-<li><strong>加速</strong>：图片、JS、CSS、视频、下载包 加载更快</li>
+<li><strong>加速</strong>：图片、JS、CSS、视频、下载包加载更快</li>
 <li><strong>减轻源站压力</strong>：大部分请求被CDN挡住，源站不会被打崩</li>
 <li><strong>防攻击</strong>：隐藏源站IP，抗DDoS、CC</li>
 <li><strong>跨地区/跨运营商访问更稳</strong>：电信访问联通、南方访问北方不卡顿</li>
 </ol>
-<hr>
-<h2>三、工作流程（运维必懂）</h2>
+<h3>三、工作流程（运维必懂）</h3>
 <ol>
 <li>用户访问资源（如图片）</li>
 <li>去<strong>最近CDN节点</strong>拿</li>
 <li>节点有缓存 → 直接返回（<strong>命中</strong>）</li>
 <li>节点没有 → 回源站拿，然后缓存下来（<strong>回源</strong>）</li>
 </ol>
-<hr>
-<h2>四、运维最常用的CDN操作</h2>
+<h3>四、运维最常用的CDN操作</h3>
 <ul>
 <li>配置<strong>域名接入</strong></li>
 <li>设置<strong>缓存规则</strong>（哪些文件缓存、多久）</li>
@@ -110,17 +124,74 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <li>配置<strong>HTTPS、跨域、防盗链</strong></li>
 <li>排查：访问慢、缓存不生效、回源异常</li>
 </ul>
-<hr>
-<h2>五、和你学的 Redis 有什么关系？</h2>
+<h3>五、和 Redis 有什么关系？</h3>
 <ul>
 <li><strong>CDN = 静态资源缓存（文件）</strong></li>
 <li><strong>Redis = 数据缓存（接口/数据库）</strong><br>
 都是<strong>缓存思想</strong>：<br>
 <strong>就近 + 缓存 + 减轻源头压力</strong></li>
 </ul>
+<h3>六、一句话总结</h3>
+<p><strong>CDN 就是把静态文件放到全国节点，让用户就近访问，更快、更稳、源站更安全。</strong></p>
 <hr>
-<h2>六、一句话总结</h2>
-<p><strong>CDN 就是把静态文件放到全国节点，让用户就近访问，更快、更稳、源站更安全。</strong></p></div>
+<h1>CDN 回源（Back-to-Origin）详细解释</h1>
+<h2>一、最简单一句话解释</h2>
+<p><strong>CDN 回源 = CDN 节点没有缓存，或缓存过期，去源站拿资源。</strong></p>
+<h2>二、英文极简定义</h2>
+<p><strong>Back-to-origin: CDN requests content from the origin server when cache misses.</strong></p>
+<h2>三、官方详细定义</h2>
+<p><strong>CDN 回源</strong>：<br>
+当用户访问某个资源时，<strong>CDN 边缘节点本地没有该资源缓存，或缓存已过期</strong>，<br>
+节点就会<strong>主动向后端源站（你的服务器）请求这份资源</strong>，<br>
+拿到资源后再返回给用户，同时在节点缓存一份。</p>
+<p>这个<strong>从源站重新拉取内容的动作，就叫回源</strong>。</p>
+<h2>四、完整流程（一步一步走）</h2>
+<ol>
+<li>用户请求图片/JS/CSS/视频等静态资源</li>
+<li>请求被调度到<strong>最近的 CDN 边缘节点</strong></li>
+<li>节点检查：
+<ul>
+<li>有没有这个文件？</li>
+<li>缓存有没有过期？</li>
+</ul>
+</li>
+<li><strong>如果没有 / 已过期 → 触发回源</strong></li>
+<li>CDN 节点去你的<strong>源站服务器</strong>请求资源</li>
+<li>源站返回资源给 CDN 节点</li>
+<li>CDN 节点<strong>缓存资源</strong></li>
+<li>CDN 节点把资源返回给用户</li>
+</ol>
+<h2>五、什么情况下会触发回源？</h2>
+<ul>
+<li>资源<strong>第一次被访问</strong></li>
+<li>缓存<strong>过期</strong>（Cache-Control/过期时间到了）</li>
+<li>缓存被<strong>清理/淘汰</strong></li>
+<li>手动执行了<strong>缓存刷新（Purge）</strong></li>
+<li>资源在节点上<strong>不存在</strong></li>
+</ul>
+<h2>六、回源会带来什么影响？</h2>
+<h3>优点</h3>
+<ul>
+<li>保证资源是<strong>最新</strong>的</li>
+<li>新内容能正常访问</li>
+</ul>
+<h3>缺点（运维重点）</h3>
+<ul>
+<li>增加<strong>源站压力</strong></li>
+<li>消耗<strong>源站带宽</strong></li>
+<li>访问<strong>延迟变大</strong></li>
+<li>回源太多可能把源站打垮</li>
+</ul>
+<h2>七、运维最关心的关键词与指标</h2>
+<ul>
+<li><strong>回源率</strong>：回源请求数 / 总请求数（越低越好）</li>
+<li><strong>回源带宽</strong>：CDN 回源产生的流量</li>
+<li><strong>回源IP</strong>：CDN 节点访问源站的 IP</li>
+<li><strong>回源协议</strong>：HTTP/HTTPS、端口、域名</li>
+<li><strong>回源规则</strong>：CDN 如何访问源站</li>
+</ul>
+<h2>八、面试标准答案（一句话总结）</h2>
+<p><strong>CDN 回源，就是 CDN 节点没有缓存或缓存过期时，主动去源站重新拉取资源的过程。目的是获取最新内容，但会增加源站压力。</strong></p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>

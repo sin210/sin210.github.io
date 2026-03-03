@@ -1,5 +1,81 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Mon, 02 Mar 2026 11:12:54 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>K8S怎么搭建高可用集群</title><link>https://sin210.github.io/post/K8S-zen-me-da-jian-gao-ke-yong-ji-qun.html</link><description>### 一、先明确：K8s 高可用集群核心架构（3/5节点，推荐3节点）
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Tue, 03 Mar 2026 02:10:15 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>如何通过yaml的形式安装监控</title><link>https://sin210.github.io/post/ru-he-tong-guo-yaml-de-xing-shi-an-zhuang-jian-kong.html</link><description>### 最终方案：纯手动创建 YAML + 部署监控（无任何外部依赖）
+#### 步骤 1：创建 Grafana 部署文件（复制完整内容）
+执行 `vi /root/grafana.yaml`，按 `i` 进入编辑模式，粘贴以下完整内容：
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: grafana
+  namespace: monitoring
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    app: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      serviceAccountName: grafana
+      containers:
+      - name: grafana
+        image: grafana/grafana:9.5.2
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        env:
+        - name: GF_SECURITY_ADMIN_USER
+          value: 'admin'
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: 'admin123'
+        - name: GF_USERS_ALLOW_SIGN_UP
+          value: 'false'
+        volumeMounts:
+        - name: grafana-data
+          mountPath: /var/lib/grafana
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+      volumes:
+      - name: grafana-data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    app: grafana
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 3000
+    nodePort: 30001  # 固定端口，方便访问
+  selector:
+    app: grafana
+```
+粘贴完成后，按 `Esc` → 输入 `:wq` 保存退出。</description><guid isPermaLink="true">https://sin210.github.io/post/ru-he-tong-guo-yaml-de-xing-shi-an-zhuang-jian-kong.html</guid><pubDate>Tue, 03 Mar 2026 02:09:49 +0000</pubDate></item><item><title>K8S怎么搭建高可用集群</title><link>https://sin210.github.io/post/K8S-zen-me-da-jian-gao-ke-yong-ji-qun.html</link><description>### 一、先明确：K8s 高可用集群核心架构（3/5节点，推荐3节点）
 高可用的核心是**控制平面（Master）多副本** + **etcd 集群高可用**（etcd 是 K8s 核心数据库，需至少3节点），避免单点故障。</description><guid isPermaLink="true">https://sin210.github.io/post/K8S-zen-me-da-jian-gao-ke-yong-ji-qun.html</guid><pubDate>Mon, 02 Mar 2026 11:12:24 +0000</pubDate></item><item><title>常见专有名词（系统）</title><link>https://sin210.github.io/post/chang-jian-zhuan-you-ming-ci-%EF%BC%88-xi-tong-%EF%BC%89.html</link><description># HIS系统 是什么（运维/面试 极简易懂版）
 **HIS = Hospital Information System**
 **医院信息系统**

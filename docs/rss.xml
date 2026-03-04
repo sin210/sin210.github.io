@@ -1,5 +1,102 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Wed, 04 Mar 2026 08:02:23 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>K8S 高可用实现机制（新手易懂版）</title><link>https://sin210.github.io/post/K8S%20-gao-ke-yong-shi-xian-ji-zhi-%EF%BC%88-xin-shou-yi-dong-ban-%EF%BC%89.html</link><description>K8S 的高可用是“分层保障”的思路，从**集群层面**到**应用层面**都有对应的解决方案，下面我会从核心组件到应用部署，一步步讲清楚。</description><guid isPermaLink="true">https://sin210.github.io/post/K8S%20-gao-ke-yong-shi-xian-ji-zhi-%EF%BC%88-xin-shou-yi-dong-ban-%EF%BC%89.html</guid><pubDate>Wed, 04 Mar 2026 08:01:52 +0000</pubDate></item><item><title>如何通过yaml的形式安装监控</title><link>https://sin210.github.io/post/ru-he-tong-guo-yaml-de-xing-shi-an-zhuang-jian-kong.html</link><description>### 最终方案：纯手动创建 YAML + 部署监控（无任何外部依赖）
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Wed, 04 Mar 2026 08:11:49 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>3 Master + 多 Worker 高可用 K8s 集群搭建步骤（kubeadm 官方标准）</title><link>https://sin210.github.io/post/3%20Master%20%2B%20-duo-%20Worker%20-gao-ke-yong-%20K8s%20-ji-qun-da-jian-bu-zou-%EF%BC%88kubeadm%20-guan-fang-biao-zhun-%EF%BC%89.html</link><description># 一、架构（3 Master 高可用）
+- **k8s-master-1：192.168.1.10**
+- **k8s-master-2：192.168.1.11**
+- **k8s-master-3：192.168.1.12**
+- （可选）Worker 节点随便加
+
+**前提：**
+- 3 台都是 Master
+- 必须有一个 **VIP/负载均衡（LB）** 地址：`192.168.1.100`（用来统一接入 apiserver）
+
+---
+
+# 二、所有节点统一初始化（3 Master + 所有 Worker 都执行）
+```bash
+# 1. 关闭防火墙
+systemctl stop firewalld
+systemctl disable firewalld
+
+# 2. 关闭 SELinux
+setenforce 0
+sed -i 's/^SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+
+# 3. 关闭 swap（必须关）
+swapoff -a
+sed -i '/swap/s/^/#/' /etc/fstab
+
+# 4. 内核参数（桥接、流量转发）
+cat &lt;&lt;EOF &gt; /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+sysctl --system
+
+# 5. 安装 docker/containerd（这里用 containerd）
+yum install -y containerd.io
+systemctl enable --now containerd
+
+# 6. 添加 k8s 源
+cat &lt;&lt;EOF &gt; /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
+
+# 7. 安装 kubeadm kubelet kubectl
+yum install -y kubelet kubeadm kubectl
+systemctl enable --now kubelet
+```
+
+---
+
+# 三、在 **第一台 Master（k8s-master-1）** 执行：初始化集群
+```bash
+kubeadm init \
+  --apiserver-advertise-address=192.168.1.10 \
+  --control-plane-endpoint=192.168.1.100 \  # 这里是 LB/VIP
+  --kubernetes-version=v1.28.2 \
+  --pod-network-cidr=10.244.0.0/16 \
+  --upload-certs
+```
+
+执行完会输出**两条关键命令**，你要保存好：
+1. **加入 Master 节点的命令**（带 --control-plane）
+2. **加入 Worker 节点的命令**
+
+---
+
+# 四、配置 kubectl（所有 Master 都要做）
+```bash
+mkdir -p $HOME/.kube
+cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+chown $(id -u):$(id -g) $HOME/.kube/config
+```
+
+---
+
+# 五、安装网络插件（Calico/Flannel）
+```bash
+kubectl apply -f https://docs.projectcalico.org/v3.26/manifests/calico.yaml
+```
+
+---
+
+# 六、把 **Master2、Master3** 加入集群（高可用）
+在 **master2、master3** 上执行 init 生成的 **join 命令**，类似：
+```bash
+kubeadm join 192.168.1.100:6443 \
+  --token xxx \
+  --discovery-token-ca-cert-hash sha256:xxx \
+  --control-plane \
+  --certificate-key xxx
+```
+只要带 `--control-plane`，就是**加入 Master 节点**。</description><guid isPermaLink="true">https://sin210.github.io/post/3%20Master%20%2B%20-duo-%20Worker%20-gao-ke-yong-%20K8s%20-ji-qun-da-jian-bu-zou-%EF%BC%88kubeadm%20-guan-fang-biao-zhun-%EF%BC%89.html</guid><pubDate>Wed, 04 Mar 2026 08:11:19 +0000</pubDate></item><item><title>K8S 高可用实现机制（新手易懂版）</title><link>https://sin210.github.io/post/K8S%20-gao-ke-yong-shi-xian-ji-zhi-%EF%BC%88-xin-shou-yi-dong-ban-%EF%BC%89.html</link><description>K8S 的高可用是“分层保障”的思路，从**集群层面**到**应用层面**都有对应的解决方案，下面我会从核心组件到应用部署，一步步讲清楚。</description><guid isPermaLink="true">https://sin210.github.io/post/K8S%20-gao-ke-yong-shi-xian-ji-zhi-%EF%BC%88-xin-shou-yi-dong-ban-%EF%BC%89.html</guid><pubDate>Wed, 04 Mar 2026 08:01:52 +0000</pubDate></item><item><title>如何通过yaml的形式安装监控</title><link>https://sin210.github.io/post/ru-he-tong-guo-yaml-de-xing-shi-an-zhuang-jian-kong.html</link><description>### 最终方案：纯手动创建 YAML + 部署监控（无任何外部依赖）
 #### 步骤 1：创建 Grafana 部署文件（复制完整内容）
 执行 `vi /root/grafana.yaml`，按 `i` 进入编辑模式，粘贴以下完整内容：
 ```yaml

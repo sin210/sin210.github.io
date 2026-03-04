@@ -211,6 +211,113 @@ curl http://127.0.0.1:8080</pre></div>
 <li><strong>配置层面</strong>：模块化拆分配置+修改后先校验语法，再平滑重启，避免服务中断；</li>
 <li><strong>性能层面</strong>：适配CPU核心数、调优长连接参数、开启gzip压缩，提升并发和传输效率；</li>
 <li><strong>安全/排障层面</strong>：限制敏感IP访问、隐藏版本号，调试日志快速定位502/404等常见问题。</li>
+</ol>
+<hr>
+<h1>Nginx 负载均衡机制（新手易懂版）</h1>
+<p>你想了解的 Nginx 负载均衡，核心是<strong>把用户请求合理分配到多台后端服务器</strong>，既提升服务并发能力，又能实现故障自动切换，是高可用架构的基础。</p>
+<h2>一、核心原理（先搞懂基础逻辑）</h2>
+<ol>
+<li>Nginx 作为<strong>反向代理服务器</strong>，接收所有客户端请求</li>
+<li>根据预设的<strong>负载均衡策略</strong>，把请求转发到后端的应用服务器集群（比如 Tomcat/Node.js/Java 服务）</li>
+<li>后端服务器处理完请求后，结果通过 Nginx 回传给客户端</li>
+<li>全程客户端只感知 Nginx 的存在，不知道后端有多少台服务器</li>
+</ol>
+<div class="highlight highlight-source-mermaid"><pre class="notranslate"><span class="pl-k">graph</span> <span class="pl-c1">LR</span>
+    客户端 <span class="pl-k">--&gt;</span> <span class="pl-ent">Nginx</span><span class="pl-s"><span class="pl-pds"><span class="pl-sg">(</span></span>负载均衡器<span class="pl-pds"><span class="pl-sg">)</span></span></span>
+    <span class="pl-ent">Nginx</span> <span class="pl-k">--&gt;</span> 服务器<span class="pl-ent">1</span>
+    <span class="pl-ent">Nginx</span> <span class="pl-k">--&gt;</span> 服务器<span class="pl-ent">2</span>
+    <span class="pl-ent">Nginx</span> <span class="pl-k">--&gt;</span> 服务器<span class="pl-ent">3</span></pre></div>
+<h2>二、常用负载均衡策略（重点）</h2>
+<p>Nginx 内置了多种分配规则，你可以根据业务场景选择：</p>
+<h3>1. 轮询（默认策略）</h3>
+<ul>
+<li><strong>逻辑</strong>：请求按顺序依次分配给后端服务器，最简单的策略</li>
+<li><strong>适用场景</strong>：后端服务器配置、性能基本一致的情况</li>
+<li><strong>核心配置示例</strong>：</li>
+</ul>
+<div class="highlight highlight-source-nginx"><pre class="notranslate"><span class="pl-c1">http</span> <span class="pl-c1">{</span>
+<span class="pl-c">    # 定义后端服务器集群（upstream 是固定关键字）</span>
+    <span class="pl-c1">upstream</span> backend_server <span class="pl-c1">{</span>
+        <span class="pl-c1">server</span> <span class="pl-c1">192.168.1.101:8080</span><span class="pl-c1">;</span>  # 服务器1
+        <span class="pl-c1">server</span> <span class="pl-c1">192.168.1.102:8080</span><span class="pl-c1">;</span>  # 服务器2
+        <span class="pl-c1">server</span> <span class="pl-c1">192.168.1.103:8080</span><span class="pl-c1">;</span>  # 服务器3
+    <span class="pl-c1">}</span>
+
+    <span class="pl-c1">server</span> <span class="pl-c1">{</span>
+        <span class="pl-c1">listen</span> <span class="pl-c1">80</span><span class="pl-c1">;</span>
+        <span class="pl-c1">server_name</span> your_domain.com<span class="pl-c1">;</span>
+
+        <span class="pl-c1">location</span> / <span class="pl-c1">{</span>
+<span class="pl-c">            # 转发请求到后端集群</span>
+            <span class="pl-c1">proxy_pass</span> <span class="pl-c1">http</span>://backend_server<span class="pl-c1">;</span>
+            <span class="pl-c1">proxy_set_header</span> Host <span class="pl-v">$host</span><span class="pl-c1">;</span>  # 传递主机头，后端能识别域名
+            <span class="pl-c1">proxy_set_header</span> X-Real-IP <span class="pl-v">$remote_addr</span><span class="pl-c1">;</span>  # 传递真实客户端IP
+        <span class="pl-c1">}</span>
+    <span class="pl-c1">}</span>
+<span class="pl-c1">}</span></pre></div>
+<h3>2. 加权轮询（weight）</h3>
+<ul>
+<li><strong>逻辑</strong>：给性能好的服务器分配更高权重，权重越高，接收的请求越多</li>
+<li><strong>适用场景</strong>：后端服务器配置不一致（比如有的是8核16G，有的是4核8G）</li>
+<li><strong>核心配置示例</strong>：</li>
+</ul>
+<div class="highlight highlight-source-nginx"><pre class="notranslate"><span class="pl-c1">upstream</span> backend_server <span class="pl-c1">{</span>
+    <span class="pl-c1">server</span> <span class="pl-c1">192.168.1.101:8080</span> weight=5<span class="pl-c1">;</span>  # 权重5，接收请求最多
+    <span class="pl-c1">server</span> <span class="pl-c1">192.168.1.102:8080</span> weight=3<span class="pl-c1">;</span>  # 权重3
+    <span class="pl-c1">server</span> <span class="pl-c1">192.168.1.103:8080</span> weight=1<span class="pl-c1">;</span>  # 权重1，接收请求最少
+<span class="pl-c1">}</span></pre></div>
+<ul>
+<li>效果：每9个请求中，服务器1拿5个，服务器2拿3个，服务器3拿1个。</li>
+</ul>
+<h3>3. IP 哈希（ip_hash）</h3>
+<ul>
+<li><strong>逻辑</strong>：根据客户端 IP 地址计算哈希值，固定把同一IP的请求分配到同一台后端服务器</li>
+<li><strong>核心作用</strong>：解决<strong>会话保持</strong>问题（比如用户登录态存在某台服务器，不会因请求转发到其他服务器导致登录失效）</li>
+<li><strong>核心配置示例</strong>：</li>
+</ul>
+<div class="highlight highlight-source-nginx"><pre class="notranslate"><span class="pl-c1">upstream</span> backend_server <span class="pl-c1">{</span>
+    <span class="pl-c1">ip_hash</span><span class="pl-c1">;</span>  # 开启IP哈希策略
+    <span class="pl-c1">server</span> <span class="pl-c1">192.168.1.101:8080</span><span class="pl-c1">;</span>
+    <span class="pl-c1">server</span> <span class="pl-c1">192.168.1.102:8080</span><span class="pl-c1">;</span>
+    <span class="pl-c1">server</span> <span class="pl-c1">192.168.1.103:8080</span> down<span class="pl-c1">;</span>  # down 标记服务器下线，不分配请求
+<span class="pl-c1">}</span></pre></div>
+<h3>4. 最少连接（least_conn）</h3>
+<ul>
+<li><strong>逻辑</strong>：优先把请求分配给当前活跃连接数最少的后端服务器</li>
+<li><strong>适用场景</strong>：请求处理时间长短不一（比如有的请求要查数据库，有的只查缓存），避免某台服务器被长请求占满</li>
+<li><strong>核心配置示例</strong>：</li>
+</ul>
+<div class="highlight highlight-source-nginx"><pre class="notranslate"><span class="pl-c1">upstream</span> backend_server <span class="pl-c1">{</span>
+    <span class="pl-c1">least_conn</span><span class="pl-c1">;</span>  # 开启最少连接策略
+    <span class="pl-c1">server</span> <span class="pl-c1">192.168.1.101:8080</span><span class="pl-c1">;</span>
+    <span class="pl-c1">server</span> <span class="pl-c1">192.168.1.102:8080</span><span class="pl-c1">;</span>
+    <span class="pl-c1">server</span> <span class="pl-c1">192.168.1.103:8080</span> backup<span class="pl-c1">;</span>  # backup 标记备用服务器，主服务器都挂了才用
+<span class="pl-c1">}</span></pre></div>
+<h3>5. 额外优化：健康检查</h3>
+<p>Nginx 会自动检测后端服务器状态，失败的服务器会被暂时剔除，恢复后自动加回：</p>
+<div class="highlight highlight-source-nginx"><pre class="notranslate"><span class="pl-c1">upstream</span> backend_server <span class="pl-c1">{</span>
+    <span class="pl-c1">server</span> <span class="pl-c1">192.168.1.101:8080</span> max_fails=3 fail_timeout=<span class="pl-c1">30s</span><span class="pl-c1">;</span>
+<span class="pl-c">    # max_fails：3次请求失败判定为服务器不可用</span>
+<span class="pl-c">    # fail_timeout：失败后30秒内不再分配请求，30秒后重试</span>
+<span class="pl-c1">}</span></pre></div>
+<h2>三、配置生效步骤（实操关键）</h2>
+<ol>
+<li>修改 Nginx 配置文件（通常在 <code class="notranslate">/etc/nginx/nginx.conf</code> 或 <code class="notranslate">/etc/nginx/conf.d/</code> 目录）</li>
+<li>检查配置语法是否正确：<code class="notranslate">nginx -t</code></li>
+<li>平滑重启 Nginx（不中断现有请求）：<code class="notranslate">nginx -s reload</code></li>
+</ol>
+<h2>四、高级扩展（了解即可）</h2>
+<p>除了内置策略，Nginx 还支持通过第三方模块实现更复杂的负载均衡：</p>
+<ul>
+<li><strong>fair</strong>：按后端服务器响应时间分配（响应快的优先）</li>
+<li><strong>url_hash</strong>：按请求URL的哈希值分配（相同URL请求到同一服务器，提升缓存命中率）</li>
+</ul>
+<hr>
+<h3>总结</h3>
+<ol>
+<li>Nginx 负载均衡核心是通过 <code class="notranslate">upstream</code> 定义后端集群，结合不同策略分配请求；</li>
+<li>基础策略优先选：轮询（默认）、加权轮询（配置不均）、IP哈希（需会话保持）、最少连接（请求耗时不均）；</li>
+<li>配置后需通过 <code class="notranslate">nginx -t</code> 检查语法，<code class="notranslate">nginx -s reload</code> 平滑重启生效。</li>
 </ol></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 

@@ -1,5 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Wed, 11 Mar 2026 08:12:08 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>redis怎么升级</title><link>https://sin210.github.io/post/redis-zen-me-sheng-ji.html</link><description># Redis 升级超详细笔记（可直接抄到笔记软件）
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Wed, 11 Mar 2026 12:50:56 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>openclaw如何使用</title><link>https://sin210.github.io/post/openclaw-ru-he-shi-yong.html</link><description># CentOS 7 部署 OpenClaw 完整指南
+## 一、部署方案对比
+|方案|适用场景|优势|劣势|
+| ---- | ---- | ---- | ---- |
+|Docker 官方镜像|追求快速部署、环境隔离、稳定运行|绕过所有系统依赖限制，一键启动|需要安装 Docker 环境|
+|Node.js 原生安装|需要深度定制、开发调试|完全控制源码，可二次开发|依赖复杂，需手动配置 Node.js 22、GCC 9 等|
+
+## 二、方案一：Docker 官方镜像部署（强烈推荐）
+此方式为 CentOS 7 上最快速、最稳定的部署方式，可完全绕过 Node.js 版本和系统依赖的限制。</description><guid isPermaLink="true">https://sin210.github.io/post/openclaw-ru-he-shi-yong.html</guid><pubDate>Wed, 11 Mar 2026 12:50:27 +0000</pubDate></item><item><title>redis怎么升级</title><link>https://sin210.github.io/post/redis-zen-me-sheng-ji.html</link><description># Redis 升级超详细笔记（可直接抄到笔记软件）
 ## 一、升级前必须搞懂的基础
 1. **Redis 版本规则**
     - 小版本：如 6.2.5 → 6.2.10，**兼容、无风险**

@@ -1,5 +1,108 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Tue, 10 Mar 2026 13:01:35 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>Pod 生命周期</title><link>https://sin210.github.io/post/Pod%20-sheng-ming-zhou-qi.html</link><description>Pod 是 Kubernetes（K8s）中最小的部署单元，其生命周期是从**创建到终止**的完整过程，核心包含「阶段划分」「关键钩子」「终止流程」三大核心部分，以下是适合笔记的精简版总结：
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Wed, 11 Mar 2026 08:12:08 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>redis怎么升级</title><link>https://sin210.github.io/post/redis-zen-me-sheng-ji.html</link><description># Redis 升级超详细笔记（可直接抄到笔记软件）
+## 一、升级前必须搞懂的基础
+1. **Redis 版本规则**
+    - 小版本：如 6.2.5 → 6.2.10，**兼容、无风险**
+    - 大版本：如 6.x → 7.x → 8.x，**可能不兼容**，必须先测
+2. **升级核心原则**
+    - 先备份、再测试、后上线
+    - 生产环境：**滚动升级，不停服**
+    - 单机：允许短停机
+3. **必须确认的信息**
+    - 当前版本：`redis-cli INFO server | grep redis_version`
+    - 数据目录：`redis-cli CONFIG GET dir`
+    - 配置文件：`redis-cli CONFIG GET config-file`
+    - 是否开启 AOF：`redis-cli CONFIG GET appendonly`
+    - 是否主从/集群/Sentinel
+
+---
+
+## 二、升级前必做准备（任何场景都要）
+### 1. 备份数据（强制）
+```bash
+# 手动触发 RDB 快照
+redis-cli SAVE
+
+# 备份数据目录（把 dir 结果填进去）
+cp -r /var/lib/redis /var/lib/redis.bak.$(date +%Y%m%d)
+
+# 备份配置文件
+cp /etc/redis/redis.conf /etc/redis/redis.conf.bak.$(date +%Y%m%d)
+```
+
+### 2. 检查数据完整性
+```bash
+# 检查 RDB
+redis-check-rdb /var/lib/redis/dump.rdb
+
+# 检查 AOF（如果开启）
+redis-check-aof /var/lib/redis/appendonly.aof
+```
+
+### 3. 停写、观察业务（可选但推荐）
+- 观察 QPS、内存、命中率
+- 可临时做**流量降级/只读**，避免升级时数据不一致
+
+---
+
+## 三、单机 Redis 升级（最简单，允许停机）
+### 步骤
+1. **停止旧版 Redis**
+    ```bash
+    redis-cli SHUTDOWN
+    # 或 systemctl stop redis
+    ```
+2. **安装新版本（源码示例）**
+    ```bash
+    wget https://download.redis.io/releases/redis-7.2.5.tar.gz
+    tar zxf redis-7.2.5.tar.gz
+    cd redis-7.2.5
+    make -j$(nproc)
+    sudo make install
+    ```
+3. **用旧配置启动**
+    ```bash
+    redis-server /etc/redis/redis.conf
+    # 或 systemctl start redis
+    ```
+4. **验证**
+    ```bash
+    redis-cli PING          # 返回 PONG
+    redis-cli INFO server | grep redis_version
+    redis-cli DBSIZE        # 看数据条数
+    ```
+
+---
+
+## 四、主从 + Sentinel 高可用升级（生产最常用）
+### 目标：**零停机滚动升级**
+### 顺序：
+**从节点 → 全部升级 → 切换主节点 → 升级原主节点**
+
+### 1. 升级所有从节点（逐个）
+```bash
+# 登陆从节点
+redis-cli -h 从IP SHUTDOWN
+
+# 安装新版本（同上）
+
+# 启动新版
+redis-server /etc/redis/redis.conf
+
+# 检查主从状态
+redis-cli -h 从IP INFO replication
+# 看到 master_link_status:up 说明同步正常
+```
+
+### 2. 手动触发主从切换（Sentinel）
+```bash
+redis-cli -p 26379 SENTINEL failover 主节点名称
+```
+- 等待：新主升主，旧主变从
+- 检查：`INFO replication`
+
+### 3. 升级原来的主节点
+现在它已经是从节点，**直接按从节点步骤升级**。</description><guid isPermaLink="true">https://sin210.github.io/post/redis-zen-me-sheng-ji.html</guid><pubDate>Wed, 11 Mar 2026 08:11:33 +0000</pubDate></item><item><title>Pod 生命周期</title><link>https://sin210.github.io/post/Pod%20-sheng-ming-zhou-qi.html</link><description>Pod 是 Kubernetes（K8s）中最小的部署单元，其生命周期是从**创建到终止**的完整过程，核心包含「阶段划分」「关键钩子」「终止流程」三大核心部分，以下是适合笔记的精简版总结：
 
 ## 一、核心阶段（Phase）
 Pod 的生命周期会表现为不同阶段，仅反映宏观状态，不代表容器具体状态：

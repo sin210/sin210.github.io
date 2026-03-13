@@ -1,5 +1,31 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Fri, 13 Mar 2026 07:09:09 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>DevOps 是什么</title><link>https://sin210.github.io/post/DevOps%20-shi-shen-me.html</link><description>**DevOps = Development + Operations**
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Fri, 13 Mar 2026 07:17:41 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>如何进行代码检查</title><link>https://sin210.github.io/post/ru-he-jin-xing-dai-ma-jian-cha.html</link><description>## 一、先搞懂：代码检查的核心类型
+流水线中的代码检查不是单一环节，而是分层的自动化校验，主要分 4 类：
+
+| 检查类型       | 检查目标                                  | 常用工具                          |
+|----------------|-------------------------------------------|-----------------------------------|
+| 代码格式/规范  | 缩进、命名、注释、代码风格统一            | ESLint（JS/TS）、Pylint（Python）、CheckStyle（Java）、Prettier（通用格式化） |
+| 静态代码分析   | 语法错误、逻辑漏洞、未定义变量、空指针等  | SonarQube（多语言）、PMD（Java）、Flake8（Python）、Cppcheck（C++） |
+| 安全扫描       | 敏感信息泄露、依赖漏洞、SQL注入、XSS等    | OWASP ZAP、Snyk、Trivy、Bandit（Python） |
+| 代码复杂度/规范 | 圈复杂度、重复代码、不符合团队规范的写法  | SonarQube、CodeClimate            |
+
+## 二、核心流程：流水线中代码检查的执行步骤
+以最常用的 **GitLab CI/GitHub Actions** 为例，代码检查的通用流程如下：
+```mermaid
+graph TD
+    A[开发者提交代码到Git仓库] --&gt; B[触发CI流水线]
+    B --&gt; C[拉取代码+准备环境（安装检查工具）]
+    C --&gt; D[第一步：代码格式检查（快速失败）]
+    D --&gt;|通过| E[第二步：静态代码分析]
+    D --&gt;|失败| F[流水线终止，返回错误信息]
+    E --&gt;|通过| G[第三步：安全扫描+依赖检查]
+    E --&gt;|失败| F
+    G --&gt;|通过| H[进入编译/测试阶段]
+    G --&gt;|失败| F
+```
+
+### 关键细节：
+1. **快速失败（Fast Fail）**：把最快的格式检查放在最前面，一旦失败立刻终止流水线，节省资源。</description><guid isPermaLink="true">https://sin210.github.io/post/ru-he-jin-xing-dai-ma-jian-cha.html</guid><pubDate>Fri, 13 Mar 2026 07:17:12 +0000</pubDate></item><item><title>DevOps 是什么</title><link>https://sin210.github.io/post/DevOps%20-shi-shen-me.html</link><description>**DevOps = Development + Operations**
 是一套**文化、流程、工具**的组合，目的是让**开发、测试、运维**高效协作，把软件**更快、更稳、更频繁**地交付上线。</description><guid isPermaLink="true">https://sin210.github.io/post/DevOps%20-shi-shen-me.html</guid><pubDate>Fri, 13 Mar 2026 07:08:34 +0000</pubDate></item><item><title>如何下载openclaw</title><link>https://sin210.github.io/post/ru-he-xia-zai-openclaw.html</link><description>在 Ubuntu 下安装 OpenClaw，优先用**一键脚本**（新手友好），也可手动用 npm 或 Docker 安装。</description><guid isPermaLink="true">https://sin210.github.io/post/ru-he-xia-zai-openclaw.html</guid><pubDate>Fri, 13 Mar 2026 06:58:59 +0000</pubDate></item><item><title>openclaw如何使用</title><link>https://sin210.github.io/post/openclaw-ru-he-shi-yong.html</link><description># CentOS 7 部署 OpenClaw 完整指南
 ## 一、部署方案对比
 |方案|适用场景|优势|劣势|

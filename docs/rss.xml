@@ -1,5 +1,96 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Thu, 09 Apr 2026 09:49:40 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>SRE 是什么？——从“救火”到“防火”的思维跃迁</title><link>https://sin210.github.io/post/SRE%20-shi-shen-me-%EF%BC%9F%E2%80%94%E2%80%94-cong-%E2%80%9C-jiu-huo-%E2%80%9D-dao-%E2%80%9C-fang-huo-%E2%80%9D-de-si-wei-yue-qian.html</link><description>## 🌟 一、SRE 是什么？——一场根本性的思维变革
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Thu, 09 Apr 2026 10:00:05 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>SRE核心理念与执行实践总结</title><link>https://sin210.github.io/post/SRE-he-xin-li-nian-yu-zhi-xing-shi-jian-zong-jie.html</link><description>## 一、核心理念（5.1）——“三不原则” + “四大能力”
+
+### ✅ 三大核心目标
+
+| 目标 | 内容 |
+|------|------|
+| **不出事** | 从设计源头预防故障，构建高可用架构 |
+| **出了事能快速恢复** | 构建快速发现、定位、恢复的自动化能力 |
+| **关键服务可用性 ≥ 99.95%** | 满足金融级SLA要求，全年宕机时间 ≤ 21.9小时 |
+
+### ✅ 四大能力建设体系
+
+| 能力维度 | 核心内容 |
+|-----------|----------|
+| **系统可靠性与可运维性设计能力** | 在开发流程前端植入SRE能力，实现“设计即可靠” |
+| **智能化海量运维平台与工具能力** | 通过软件工程方法，打造自动化、智能化运维体系 |
+| **工业化大生产运维能力** | 支持云服务快速迭代、持续交付，实现“现网运维工业化” |
+| **SRE能力共享与赋能能力（SRE-E）** | 将华为SRE平台与能力开放给合作伙伴，协助其转型SRE模式 |
+
+---
+
+## 二、执行原则（5.2）——“50%+50%”与“闭环自愈”
+
+### ✅ 核心执行框架：50% 日常运维 + 50% SRE“E”工作
+
+| 类别 | 工作内容 | 目标 |
+|------|-----------|------|
+| **日常运维（50%）** | 故障恢复、告警处理、变更管理、容量管理 | 达成SLA目标，保障业务稳定运行 |
+| **SRE“E”工作（50%）** | 高可用设计、监控告警开发、故障恢复工具化、自动化演练 | 实现“从被动响应到主动预防”的转变 |
+
+---
+
+### ✅ 高可用设计五大关键点
+
+| 设计维度 | 关键动作 |
+|----------|----------|
+| **故障隔离** | 支持集群化部署，服务具备容错与降级能力 |
+| **容灾架构** | 同城双活、异地多活；容量冗余设计 |
+| **流控能力** | 有损服务设计，支持限流、熔断、降级 |
+| **数据高可用** | 多副本备份、自动切换、一致性保障 |
+| **监控告警设计** | 构建立体监控体系，实现故障“早发现、快定位” |
+
+---
+
+### ✅ 自动化与自愈能力闭环建设
+
+| 能力层级 | 关键实践 |
+|----------|----------|
+| **自动化运维** | 实现“4个一键式”：一键上线、一键变更、一键扩容、一键下线 |
+| **故障自愈能力** | 通过“三板斧”运维能力（快速诊断、快速恢复、快速闭环）实现故障自动处理 |
+| **经验沉淀与智能化** | 基于故障诊断平台，将现网经验固化为工具与规则，形成智能化运维能力 |
+
+---
+
+### ✅ 数据驱动与持续改进
+
+| 机制 | 内容 |
+|------|------|
+| **运维数据度量体系** | 收集并度量故障率、恢复时长、告警准确率、自动化覆盖率等关键指标 |
+| **数据运营管理** | 持续反馈运维数据，用于评估SLA达成情况、识别改进机会 |
+| **驱动产品持续改进** | 通过数据洞察，反哺云服务产品设计与开发，实现“运维推动产品演进” |
+
+---
+
+## 三、SRE业务活动指导（5.3.1）——贯穿云服务全生命周期
+
+### ✅ SRE参与云服务生命周期关键阶段
+
+| 阶段 | 核心SRE活动 | 关键产出 |
+|------|----------------|-----------|
+| **设计阶段** | 可用性/容灾/流控/数据高可用设计；监控告警指标设计；部署分区与资源规格设计 | 高可用架构文档、监控基线、部署方案 |
+| **开发阶段** | 高可用能力开发；底线场景预案开发；监控代码开发；部署变更自动化开发 | 自动化脚本、应急处理预案、可运行代码 |
+| **测试阶段** | 构造故障场景，进行可靠性、监控、部署、压力、扩容测试；演练与验证 | 测试报告、故障恢复验证记录 |
+| **公测/商用阶段** | PRR评估（上线前风险评估）；输出风险评估与改进建议 | PRR报告、上线决策建议 |
+
+---
+
+### ✅ 关键质量要求（开发阶段）
+
+- ✅ 代码符合 **CleanCode 规范**
+- ✅ 通过 **同行评审（Peer Review）**
+- ✅ 通过 **静态检查门禁（Static Check Gate）**
+- ✅ 通过 **高危命令检视（High-risk Command Review）**
+- ✅ 合入 **GitLab 统一管理**，形成有形资产
+
+---
+
+## 四、关键能力（5.4）——SRE落地的“四大支柱”
+
+| 能力 | 能力描述与建设目标 |
+|------|------------------------|
+| **高可用与容灾架构** | 云服务具备系统高可靠性要求（双机、集群、过负荷保护、业务健壮性）；具备基本容灾能力，支持Global容灾、跨AZ、跨Region容灾；出现故障时能快速迁移，保障业务连续性。</description><guid isPermaLink="true">https://sin210.github.io/post/SRE-he-xin-li-nian-yu-zhi-xing-shi-jian-zong-jie.html</guid><pubDate>Thu, 09 Apr 2026 09:59:38 +0000</pubDate></item><item><title>SRE 是什么？——从“救火”到“防火”的思维跃迁</title><link>https://sin210.github.io/post/SRE%20-shi-shen-me-%EF%BC%9F%E2%80%94%E2%80%94-cong-%E2%80%9C-jiu-huo-%E2%80%9D-dao-%E2%80%9C-fang-huo-%E2%80%9D-de-si-wei-yue-qian.html</link><description>## 🌟 一、SRE 是什么？——一场根本性的思维变革
 
 过去，我对“运维”的理解停留在：
 - 故障响应 🚨

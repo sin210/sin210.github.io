@@ -1,5 +1,14 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Fri, 10 Apr 2026 04:51:50 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>CLS（Cloud Log Service）工具使用指南（上篇）</title><link>https://sin210.github.io/post/CLS%EF%BC%88Cloud%20Log%20Service%EF%BC%89-gong-ju-shi-yong-zhi-nan-%EF%BC%88-shang-pian-%EF%BC%89.html</link><description># 📘 CLS（Cloud Log Service）工具使用指南（上篇）
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Fri, 10 Apr 2026 04:54:54 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>CLS（Cloud Log Service）工具使用指南（下篇）</title><link>https://sin210.github.io/post/CLS%EF%BC%88Cloud%20Log%20Service%EF%BC%89-gong-ju-shi-yong-zhi-nan-%EF%BC%88-xia-pian-%EF%BC%89.html</link><description># 📘 CLS（Cloud Log Service）工具使用指南（下篇）
+
+&gt; 基于华为云 Cloud Log Service（CLS）平台，面向SRE、运维工程师、开发人员、安全团队的**云上日志统一管理与智能分析实操手册**
+
+---
+
+## 七、日志告警规则配置（智能预警，防患未然）
+
+### ✅ 1. 什么是日志告警？
+日志告警是CLS平台中一项核心功能，允许用户根据日志内容、频率、模式等条件，设置自动触发的告警规则。</description><guid isPermaLink="true">https://sin210.github.io/post/CLS%EF%BC%88Cloud%20Log%20Service%EF%BC%89-gong-ju-shi-yong-zhi-nan-%EF%BC%88-xia-pian-%EF%BC%89.html</guid><pubDate>Fri, 10 Apr 2026 04:54:24 +0000</pubDate></item><item><title>CLS（Cloud Log Service）工具使用指南（上篇）</title><link>https://sin210.github.io/post/CLS%EF%BC%88Cloud%20Log%20Service%EF%BC%89-gong-ju-shi-yong-zhi-nan-%EF%BC%88-shang-pian-%EF%BC%89.html</link><description># 📘 CLS（Cloud Log Service）工具使用指南（上篇）
 
 &gt; 基于华为云 Cloud Log Service（CLS）平台，面向SRE、运维工程师、开发人员、安全团队的**云上日志统一管理与智能分析实操手册**
 

@@ -296,7 +296,155 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <td>基线已刷新</td>
 </tr>
 </tbody>
-</table></markdown-accessiblity-table></div>
+</table></markdown-accessiblity-table>
+<h2>5 巡检作业执行要求</h2>
+<h3>5.1 巡检作业执行要求</h3>
+<p>• <strong>严格遵循标准</strong><br>
+禁止遗漏巡检项。若作业环境不满足或存在风险，需及时提出。<br>
+巡检SOP（标准操作流程）必须经过三方联合评审，新增或刷新SOP需重新评审（能力中心/共享中心各域TD/巡检SE）。</p>
+<p>• <strong>明确基线范围</strong><br>
+唯一有效的巡检基线为《共享中心飞行员手册》中“5 巡检作业--查询类SOP清单”。SOP仅用于查询，不涉及变更操作。</p>
+<p>• <strong>风险通报机制</strong><br>
+工具异常导致的误报信息需在保障群组通报进展。</p>
+<hr>
+<h3>5.2 巡检作业执行质量要求</h3>
+<p>• <strong>0漏检/误检导致现网P4+事件</strong><br>
+按时完成巡检，确保风险及时发现并解决。<br>
+<strong>惩罚机制</strong>：因漏检/误检引发P4+事件者，将追责。</p>
+<p>• <strong>时效性要求</strong><br>
+巡检及时完成率不低于 <strong>99%</strong>：</p>
+<ul>
+<li>巡检时间窗：提前10分钟（集中保障30分钟），延后20分钟。</li>
+<li>离岗、处理其他事务时需提前完成交接或安排备份人员。</li>
+</ul>
+<p>• <strong>结果准确性</strong><br>
+巡检反馈结果准确率不低于 <strong>99%</strong>：</p>
+<ul>
+<li>客户信息、时间、指标结果等需严格校对。</li>
+<li>错漏信息需相互提醒并及时撤回，超时后补发修正结果。</li>
+</ul>
+<hr>
+<h2>6 巡检风险记录和跟踪要求说明</h2>
+<h3>6.1 巡检风险记录地址</h3>
+<p><a href="https://onebox.huawei.com/v/f655dd2fe9a0df16b806e011f096edcf?type=1&amp;amp;sheet=%E5%9D%97%E5%AD%98%E5%82%A8" rel="nofollow">https://onebox.huawei.com/v/f655dd2fe9a0df16b806e011f096edcf?type=1&amp;amp;sheet=%E5%9D%97%E5%AD%98%E5%82%A8</a></p>
+<h3>6.2 巡检风险记录要求</h3>
+<ol>
+<li>
+<p><strong>登记原则</strong>：</p>
+<ul>
+<li>所有异常均需登记至巡检风险记录表。</li>
+<li>各类风险闭环需闭环证明截图（如TAM沟通结论、SRE方案等）。</li>
+</ul>
+</li>
+<li>
+<p><strong>分类处理</strong>：</p>
+<ul>
+<li><strong>客户风险</strong>：通过TAM与客户闭环。</li>
+<li><strong>工具误报</strong>：汇总分析并推动工具优化。</li>
+</ul>
+</li>
+</ol>
+<h3>6.3 巡检风险记录相关字段说明</h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>字段名称</th>
+<th>说明</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>首次发现时间</strong></td>
+<td>记录巡检发现时间（如：09:00）</td>
+<td>09:00</td>
+</tr>
+<tr>
+<td><strong>异常复现时间/持续时间</strong></td>
+<td>复现时间或持续未恢复时间</td>
+<td>内存超阈值自恢复（09:30发现），或持续未恢复（累计3天）</td>
+</tr>
+<tr>
+<td><strong>异常次数/累计时长</strong></td>
+<td>复现次数或累计时间</td>
+<td>复现4次，或累计72小时</td>
+</tr>
+<tr>
+<td><strong>当前状态</strong></td>
+<td>选项：已关闭/挂起/未关闭/风险预警（已上升/已推送）</td>
+<td>挂起</td>
+</tr>
+<tr>
+<td><strong>风险事态预警</strong></td>
+<td>3天内未闭环的TAM闭环风险录入大客户保障系统</td>
+<td>请参考：<a href="https://wiki.huawei.com/domains/74917/wiki/120561/WIKI202406113743791" rel="nofollow">https://wiki.huawei.com/domains/74917/wiki/120561/WIKI202406113743791</a></td>
+</tr>
+<tr>
+<td><strong>异常指标</strong></td>
+<td>按巡检基线指标项单位记录</td>
+<td>客户xx集群作业自动备份未开启，需记录2条异常（作业备份+并发数上限）</td>
+</tr>
+<tr>
+<td><strong>闭环/挂起证明</strong></td>
+<td>处置结论截图或方案描述</td>
+<td>SRE优化方案截图</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<hr>
+<h2>7 巡检作业稽查规则和稽查执行标准</h2>
+<h3>7.1 稽查规则说明</h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>序号</th>
+<th>稽查项目</th>
+<th>稽查方法</th>
+<th>判断标准</th>
+<th>业务影响</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>巡检任务是否按时完成</td>
+<td>- 随机稽查3家客户3天的巡检作业<br>- 已晚检/漏检视为违约</td>
+<td>- 巡检及时完成率99%<br>- 0漏检导致现网事件</td>
+<td>影响及时性与现网安全</td>
+</tr>
+<tr>
+<td>2</td>
+<td>巡检结果与实际是否相符</td>
+<td>- 核对反馈时间、群组、范围及结果</td>
+<td>- 禁止谎报问题，影响事故处理<br>- 推动工具改进</td>
+<td>涉及运维红线</td>
+</tr>
+<tr>
+<td>3</td>
+<td>是否按SOP完成巡检作业</td>
+<td>- 人工/自动化稽查配置项是否齐全</td>
+<td>- 遗漏巡检项或判断不准</td>
+<td>巡检结果不可靠</td>
+</tr>
+<tr>
+<td>4</td>
+<td>巡检异常风险是否正确记录</td>
+<td>- 核查登记表与实际风险项比对</td>
+<td>- 风险需完整记录<br>- 多项风险需分条记录<br>- 重复风险无需重复记录</td>
+<td>降低风险遗漏率，优化工具</td>
+</tr>
+<tr>
+<td>5</td>
+<td>巡检异常风险闭环是否合理</td>
+<td>- 3天内核查风险更新状态与闭环时效</td>
+<td>- <strong>关闭</strong>：风险彻底消除<br>- <strong>挂起</strong>：TAM确认需客户/SRE解决<br>- <strong>风险预警</strong>：未闭环需预警</td>
+<td>闭环时效性、人力优化</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p>&gt; <strong>注</strong>：稽查争议处理流程：<br>
+&gt; 1. 争议问题上升巡检SE处理；<br>
+&gt; 2. 巡检SE无法达成一致，上报华为主管决策。</p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>

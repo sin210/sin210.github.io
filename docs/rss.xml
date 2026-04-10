@@ -1,5 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Thu, 09 Apr 2026 10:00:05 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>SRE核心理念与执行实践总结</title><link>https://sin210.github.io/post/SRE-he-xin-li-nian-yu-zhi-xing-shi-jian-zong-jie.html</link><description>## 一、核心理念（5.1）——“三不原则” + “四大能力”
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Fri, 10 Apr 2026 02:39:43 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>CMDB工具的使用</title><link>https://sin210.github.io/post/CMDB-gong-ju-de-shi-yong.html</link><description># 📘 CMDB工具使用指南  
+&gt; 基于华为云 CloudCMDB 平台，面向SRE、运维、开发人员的**配置管理数据库（CMDB）实操手册**
+
+---
+
+## 一、什么是CMDB？
+
+### ✅ 定义
+**CMDB（Configuration Management Database，配置管理数据库）** 是IT服务管理（ITSM）中的核心数据平台，用于**统一存储、管理、维护所有IT基础设施与应用服务的配置项（CI）及其相互关系**。</description><guid isPermaLink="true">https://sin210.github.io/post/CMDB-gong-ju-de-shi-yong.html</guid><pubDate>Fri, 10 Apr 2026 02:39:12 +0000</pubDate></item><item><title>SRE核心理念与执行实践总结</title><link>https://sin210.github.io/post/SRE-he-xin-li-nian-yu-zhi-xing-shi-jian-zong-jie.html</link><description>## 一、核心理念（5.1）——“三不原则” + “四大能力”
 
 ### ✅ 三大核心目标
 

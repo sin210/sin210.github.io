@@ -1,5 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Fri, 10 Apr 2026 03:25:17 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>CAC（Cloud Auto Change）工具使用指南</title><link>https://sin210.github.io/post/CAC%EF%BC%88Cloud%20Auto%20Change%EF%BC%89-gong-ju-shi-yong-zhi-nan.html</link><description># 📘 CAC（Cloud Auto Change）工具使用指南  
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Fri, 10 Apr 2026 04:28:44 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>堡垒机（Cloud Secure Management, CSM）工具使用指南</title><link>https://sin210.github.io/post/bao-lei-ji-%EF%BC%88Cloud%20Secure%20Management%2C%20CSM%EF%BC%89-gong-ju-shi-yong-zhi-nan.html</link><description># 📘 堡垒机（Cloud Secure Management, CSM）工具使用指南  
+&gt; 基于华为云 Cloud Secure Management（CSM）平台，面向SRE、运维工程师、安全团队的**云上安全运维访问控制实操手册**
+
+---
+
+## 一、什么是堡垒机？
+
+### ✅ 定义
+**堡垒机（Bastion Host / CSM）** 是华为云提供的 **统一安全运维入口平台**，用于集中管理对云资源（如ECS、RDS、Kubernetes集群、VPC等）的访问权限与操作行为，实现 **“所有访问必须经由堡垒机”** 的安全管控策略。</description><guid isPermaLink="true">https://sin210.github.io/post/bao-lei-ji-%EF%BC%88Cloud%20Secure%20Management%2C%20CSM%EF%BC%89-gong-ju-shi-yong-zhi-nan.html</guid><pubDate>Fri, 10 Apr 2026 04:28:12 +0000</pubDate></item><item><title>CAC（Cloud Auto Change）工具使用指南</title><link>https://sin210.github.io/post/CAC%EF%BC%88Cloud%20Auto%20Change%EF%BC%89-gong-ju-shi-yong-zhi-nan.html</link><description># 📘 CAC（Cloud Auto Change）工具使用指南  
 &gt; 基于华为云 Cloud Auto Change（CAC）平台，面向SRE、DevOps、运维工程师的**云上自动化变更管理实操手册**
 
 ---

@@ -1,5 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Thu, 16 Apr 2026 02:28:57 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>华为云事件作业规范</title><link>https://sin210.github.io/post/hua-wei-yun-shi-jian-zuo-ye-gui-fan.html</link><description>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frostnova</title><link>https://sin210.github.io</link><description>I… volunteer to join Rhodes Island.</description><copyright>Frostnova</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/264126132?v=4&amp;size=64</url><title>avatar</title><link>https://sin210.github.io</link></image><lastBuildDate>Thu, 16 Apr 2026 02:37:30 +0000</lastBuildDate><managingEditor>Frostnova</managingEditor><ttl>60</ttl><webMaster>Frostnova</webMaster><item><title>华为云事件处理规范（修订版）</title><link>https://sin210.github.io/post/hua-wei-yun-shi-jian-chu-li-gui-fan-%EF%BC%88-xiu-ding-ban-%EF%BC%89.html</link><description>
+
+---
+
+## 一、新增事件提单规范
+
+1. **非OSM来源入口的内部用户咨询单**  
+   内部各运维团队、研发团队等提交的咨询类工单，若非通过OSM系统入口发起，应统一通过一线入口提单。</description><guid isPermaLink="true">https://sin210.github.io/post/hua-wei-yun-shi-jian-chu-li-gui-fan-%EF%BC%88-xiu-ding-ban-%EF%BC%89.html</guid><pubDate>Thu, 16 Apr 2026 02:37:02 +0000</pubDate></item><item><title>华为云事件作业规范</title><link>https://sin210.github.io/post/hua-wei-yun-shi-jian-zuo-ye-gui-fan.html</link><description>
 
 ---
 

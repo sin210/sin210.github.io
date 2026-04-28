@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/264126132?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# 📘 CMC（Cloud Monitor Center）工具使用指南  
+> 基于华为云 Cloud Monitor Center（CMC）平台，面向SRE、运维、开发人员的**云监控中心实操手册**
+
+---
+
+## 一、什么是CMC？
+
+### ✅ 定义
+**CMC（Cloud Monitor Center，云监控中心）** 是华为云提供的 **统一监控可视化平台**，用于集中展示、分析、管理全栈云资源（ECS、RDS、ELB、VPC、Kubernetes、微服务等）的运行状态与性能指标。">
+<meta property="og:title" content="CMC（Cloud Monitor Center）工具使用指南">
+<meta property="og:description" content="# 📘 CMC（Cloud Monitor Center）工具使用指南  
+> 基于华为云 Cloud Monitor Center（CMC）平台，面向SRE、运维、开发人员的**云监控中心实操手册**
+
+---
+
+## 一、什么是CMC？
+
+### ✅ 定义
+**CMC（Cloud Monitor Center，云监控中心）** 是华为云提供的 **统一监控可视化平台**，用于集中展示、分析、管理全栈云资源（ECS、RDS、ELB、VPC、Kubernetes、微服务等）的运行状态与性能指标。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://sin210.github.io/post/CMC%EF%BC%88Cloud%20Monitor%20Center%EF%BC%89-gong-ju-shi-yong-zhi-nan.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/264126132?v=4&size=64">
+<title>CMC（Cloud Monitor Center）工具使用指南</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">CMC（Cloud Monitor Center）工具使用指南</h1>
+<div class="title-right">
+    <a href="https://sin210.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/sin210/sin210.github.io/issues/31" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>📘 CMC（Cloud Monitor Center）工具使用指南</h1>
+<blockquote>
+<p>基于华为云 Cloud Monitor Center（CMC）平台，面向SRE、运维、开发人员的<strong>云监控中心实操手册</strong></p>
+</blockquote>
+<hr>
+<h2>一、什么是CMC？</h2>
+<h3>✅ 定义</h3>
+<p><strong>CMC（Cloud Monitor Center，云监控中心）</strong> 是华为云提供的 <strong>统一监控可视化平台</strong>，用于集中展示、分析、管理全栈云资源（ECS、RDS、ELB、VPC、Kubernetes、微服务等）的运行状态与性能指标。</p>
+<blockquote>
+<p>📌 <strong>核心定位</strong>：<br>
+🟢 一站式监控视图<br>
+🟢 全链路性能追踪<br>
+🟢 多维度指标分析<br>
+🟢 与CMA告警系统无缝联动</p>
+</blockquote>
+<hr>
+<h2>二、CMC核心功能模块</h2>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>模块</th>
+<th>功能说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔹 <strong>全局监控仪表盘（Dashboard）</strong></td>
+<td>提供组织/项目/环境级别的统一监控视图，支持自定义可视化组件（图表、指标卡、拓扑图等）。</td>
+</tr>
+<tr>
+<td>🔹 <strong>资源监控（Resource Monitoring）</strong></td>
+<td>实时查看单个或多个云资源（如ECS、RDS）的CPU、内存、磁盘、网络等关键指标。</td>
+</tr>
+<tr>
+<td>🔹 <strong>链路追踪与调用分析（Tracing &amp; Call Analysis）</strong></td>
+<td>支持微服务架构下的请求链路追踪，可视化展示请求在各服务间的流转路径、耗时分布、错误率等。</td>
+</tr>
+<tr>
+<td>🔹 <strong>日志与指标联动分析（Log-Metric Correlation）</strong></td>
+<td>支持将监控指标与关联日志（如应用日志、访问日志）进行双向联动，快速定位故障根因。</td>
+</tr>
+<tr>
+<td>🔹 <strong>告警联动与事件中心（Alert &amp; Event Integration）</strong></td>
+<td>与CMA告警系统深度集成，支持在CMC中直接查看告警事件、处理告警、查看影响范围。</td>
+</tr>
+<tr>
+<td>🔹 <strong>自定义监控模板与共享（Custom Template &amp; Sharing）</strong></td>
+<td>支持创建、保存、共享监控模板（如“Web服务监控模板”、“数据库性能监控模板”），提升团队协作效率。</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<hr>
+<h2>三、CMC典型使用场景</h2>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>场景</th>
+<th>使用方式</th>
+<th>价值体现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅ <strong>全栈资源状态一目了然</strong></td>
+<td>在仪表盘中查看组织内所有ECS、RDS、ELB等资源的运行状态与关键指标</td>
+<td>提升全局掌控力</td>
+</tr>
+<tr>
+<td>✅ <strong>微服务调用链路故障定位</strong></td>
+<td>在“链路追踪”模块中查看某次请求的完整调用路径，识别耗时瓶颈或异常服务</td>
+<td>缩短MTTR（平均修复时间）</td>
+</tr>
+<tr>
+<td>✅ <strong>应用性能瓶颈分析（APM）</strong></td>
+<td>查看某服务的请求响应时间、TPS、错误率等指标，结合日志分析性能瓶颈</td>
+<td>优化系统架构</td>
+</tr>
+<tr>
+<td>✅ <strong>告警事件快速响应</strong></td>
+<td>在“事件中心”中查看CMA触发的告警，直接跳转至相关资源监控页，启动排查流程</td>
+<td>提高告警处理效率</td>
+</tr>
+<tr>
+<td>✅ <strong>新系统上线前性能基线评估</strong></td>
+<td>在上线前，通过CMC采集系统在高负载下的关键指标，建立性能基线</td>
+<td>预防上线后性能问题</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<hr>
+<h2>四、CMC核心操作流程（以华为云CMC为例）</h2>
+<h3>🔧 1. 登录CMC平台</h3>
+<ul>
+<li>访问地址：<code class="notranslate">https://monitor.cloud.huawei.com</code></li>
+<li>使用企业账号登录（需具备 <code class="notranslate">CMC_Super_reader</code> 权限）</li>
+</ul>
+<h3>📊 2. 进入仪表盘（Dashboard）</h3>
+<ul>
+<li>首页默认展示“组织级”或“项目级”仪表盘</li>
+<li>可通过顶部导航栏切换不同维度的视图：
+<ul>
+<li>🌐 <strong>全组织视图</strong></li>
+<li>📦 <strong>项目/环境视图</strong>（如：生产/预发/测试）</li>
+<li>🖥️ <strong>单资源视图</strong>（如：某台ECS服务器）</li>
+</ul>
+</li>
+</ul>
+<h3>📈 3. 查看资源监控指标</h3>
+<ul>
+<li>在仪表盘中点击某个资源（如：<code class="notranslate">ecs-prod-01</code>）</li>
+<li>进入资源监控详情页，查看：
+<ul>
+<li>实时指标曲线（CPU、内存、磁盘IO、网络带宽）</li>
+<li>指标趋势图（按小时、天、周查看）</li>
+<li>指标统计信息（最大值、最小值、平均值、当前值）</li>
+</ul>
+</li>
+</ul>
+<h3>🔗 4. 使用链路追踪功能（Tracing）</h3>
+<ul>
+<li>进入「链路追踪」模块</li>
+<li>输入请求ID或服务名，查找特定请求</li>
+<li>查看请求的完整调用路径，包括：
+<ul>
+<li>各服务的调用耗时（毫秒）</li>
+<li>调用状态（成功/失败）</li>
+<li>错误信息（如：超时、500错误）</li>
+</ul>
+</li>
+<li>点击任一节点，可查看该服务的监控指标与日志</li>
+</ul>
+<h3>📝 5. 日志与指标联动分析</h3>
+<ul>
+<li>在资源监控页，点击某条异常指标曲线</li>
+<li>选择「关联日志」，系统将自动加载该时间段内的相关日志</li>
+<li>通过关键词搜索（如：<code class="notranslate">error</code>、<code class="notranslate">timeout</code>），快速定位问题日志</li>
+<li>可将日志片段直接分享给开发人员或SRE团队</li>
+</ul>
+<h3>🛠️ 6. 查看告警事件与处理</h3>
+<ul>
+<li>进入「事件中心」模块</li>
+<li>查看所有来自CMA系统的告警事件</li>
+<li>可按以下条件筛选：
+<ul>
+<li>告警级别（P1~P4）</li>
+<li>告警类型（CPU过高、磁盘满、网络异常等）</li>
+<li>时间范围</li>
+</ul>
+</li>
+<li>点击任一条告警，可：
+<ul>
+<li>查看影响范围（哪些资源受到影响）</li>
+<li>查看告警详情与触发条件</li>
+<li>直接跳转至相关资源监控页</li>
+<li>手动确认或恢复告警</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>五、仪表盘自定义与模板管理</h2>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>功能</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅ <strong>创建自定义仪表盘</strong></td>
+<td>点击「新建仪表盘」，添加图表、指标卡、拓扑图等组件，按需布局</td>
+</tr>
+<tr>
+<td>✅ <strong>保存与命名仪表盘</strong></td>
+<td>为仪表盘命名（如：“生产环境监控大盘”），并选择所属项目或环境</td>
+</tr>
+<tr>
+<td>✅ <strong>共享仪表盘</strong></td>
+<td>可将仪表盘分享给指定团队成员或角色（如：SRE团队、开发组）</td>
+</tr>
+<tr>
+<td>✅ <strong>使用预置模板</strong></td>
+<td>CMC提供多种预置监控模板（如：Web服务、数据库、Kubernetes集群），可一键应用</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<blockquote>
+<p>✅ <strong>建议</strong>：<br>
+每个项目/环境应建立专属的“监控仪表盘”，并定期优化布局与指标展示。</p>
+</blockquote>
+<hr>
+<h2>六、权限管理规范</h2>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>权限等级</th>
+<th>权限说明</th>
+<th>适用角色</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="notranslate">Super_reader</code></td>
+<td>超级只读权限 —— 可查看所有仪表盘、资源监控、链路追踪、事件中心内容</td>
+<td>所有SRE、运维、开发人员</td>
+</tr>
+<tr>
+<td><code class="notranslate">Reader</code></td>
+<td>普通只读权限 —— 可查看本项目/本部门下的监控数据</td>
+<td>部门内普通成员</td>
+</tr>
+<tr>
+<td><code class="notranslate">Editor</code></td>
+<td>编辑权限 —— 可创建、修改、删除自定义仪表盘与模板</td>
+<td>监控管理员、SRE负责人</td>
+</tr>
+<tr>
+<td><code class="notranslate">Super_admin</code></td>
+<td>超级管理员 —— 拥有所有权限，可管理用户权限、系统配置</td>
+<td>CMC平台管理员</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<blockquote>
+<p>✅ <strong>重要提醒</strong>：<br>
+所有人员在使用CMC前，<strong>必须申请并获得 <code class="notranslate">CMC_Super_reader</code> 权限</strong>，否则无法正常开展工作。</p>
+</blockquote>
+<hr>
+<h2>七、最佳实践建议</h2>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>实践</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅ <strong>仪表盘“按需设计”</strong></td>
+<td>不同团队关注点不同：SRE关注资源状态，开发关注服务性能，领导关注整体健康度</td>
+</tr>
+<tr>
+<td>✅ <strong>启用“链路追踪”常态化监控</strong></td>
+<td>对关键业务服务开启链路追踪，实时监控请求耗时、错误率，提前发现性能瓶颈</td>
+</tr>
+<tr>
+<td>✅ <strong>建立“监控基线”与“异常阈值”</strong></td>
+<td>在系统上线前采集正常负载下的指标数据，作为“基线”；设置合理的“异常阈值”以避免误报</td>
+</tr>
+<tr>
+<td>✅ <strong>定期清理过期或无用的仪表盘</strong></td>
+<td>每季度组织一次监控资产盘点，清理不再使用的仪表盘与模板</td>
+</tr>
+<tr>
+<td>✅ <strong>与CI/CD流水线联动</strong></td>
+<td>在CI/CD流水线中集成CMC监控，上线后自动采集性能指标，验证上线质量</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<hr>
+<h2>八、常见问题与解决方案（FAQ）</h2>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>问题</th>
+<th>原因</th>
+<th>解决方案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>❓ 无法查看某资源的监控数据</td>
+<td>该资源未启用监控采集，或权限不足</td>
+<td></td>
+</tr>
+<tr>
+<td>❓ 链路追踪中找不到某次请求</td>
+<td>该请求未开启链路追踪，或追踪ID已过期</td>
+<td></td>
+</tr>
+<tr>
+<td>❓ 仪表盘显示延迟或空白</td>
+<td>网络连接不稳定或浏览器缓存异常</td>
+<td></td>
+</tr>
+<tr>
+<td>❓ 告警事件未同步到CMC</td>
+<td>CMA与CMC未正确集成，或事件同步服务异常</td>
+<td></td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<hr>
+<h2>九、附录：常用快捷操作与技巧</h2>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>快捷操作</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="notranslate">Ctrl + F</code></td>
+<td>快速打开搜索框</td>
+</tr>
+<tr>
+<td><code class="notranslate">Shift + 点击</code></td>
+<td>批量选择多个资源或事件</td>
+</tr>
+<tr>
+<td><code class="notranslate">F5</code></td>
+<td>刷新当前页面</td>
+</tr>
+<tr>
+<td><code class="notranslate">Ctrl + Shift + D</code></td>
+<td>导出当前仪表盘或监控图表为PNG/SVG</td>
+</tr>
+<tr>
+<td><code class="notranslate">右键菜单</code></td>
+<td>快速跳转至资源详情页、查看告警历史、一键新建仪表盘</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<hr>
+<blockquote>
+<p>✅ <strong>文档结束</strong><br>
+📝 本指南可直接用于SRE团队培训、新员工入职手册、CMC使用规范文档。</p>
+</blockquote>
+<hr></div>
+<div style="font-size:small;margin-top:8px;float:right;"></div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://sin210.github.io">Frostnova</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行 "+diffDay+" 天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.disabled=true;
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","sin210/sin210.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+
+
+</script>
+<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekTOC.js'></script><script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>
+
+</html>

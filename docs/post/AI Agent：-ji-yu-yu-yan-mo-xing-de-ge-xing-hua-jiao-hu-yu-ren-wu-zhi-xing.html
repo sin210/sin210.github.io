@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/264126132?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="> **AI Agent 通过语言模型实现个性化交互，利用 system prompt 和工具指令完成任务。">
+<meta property="og:title" content="AI Agent：基于语言模型的个性化交互与任务执行">
+<meta property="og:description" content="> **AI Agent 通过语言模型实现个性化交互，利用 system prompt 和工具指令完成任务。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://sin210.github.io/post/AI%20Agent%EF%BC%9A-ji-yu-yu-yan-mo-xing-de-ge-xing-hua-jiao-hu-yu-ren-wu-zhi-xing.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/264126132?v=4&size=64">
+<title>AI Agent：基于语言模型的个性化交互与任务执行</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">AI Agent：基于语言模型的个性化交互与任务执行</h1>
+<div class="title-right">
+    <a href="https://sin210.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/sin210/sin210.github.io/issues/56" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><blockquote>
+<p><strong>AI Agent 通过语言模型实现个性化交互，利用 system prompt 和工具指令完成任务。</strong></p>
+</blockquote>
+<hr>
+<h2>一、语言模型运作原理</h2>
+<p>语言模型是 AI Agent 的核心“大脑”，其工作方式看似简单，实则蕴含复杂的推理与生成机制。</p>
+<h3>1. 文字接龙式的文本生成</h3>
+<p>语言模型的本质是<strong>基于统计概率的文本续写系统</strong>。当用户输入一段文字（如“今天天气真好，我想去”），模型会根据已学知识，预测下一个最可能的词语或句子，实现“文字接龙”式的自然延续。</p>
+<h3>2. 上下文窗口（Context Window）的限制</h3>
+<p>语言模型的输入长度受到“上下文窗口”的限制——即模型能够一次性处理的文本长度。例如，某些模型只能处理 4096 个 token（中文约 1000–1500 字），超过后将被截断，导致上下文丢失。</p>
+<blockquote>
+<p><g-emoji class="g-emoji" alias="warning">⚠️</g-emoji> 这意味着：越长的对话历史、越复杂的任务指令，越容易因上下文溢出而影响生成质量。</p>
+</blockquote>
+<h3>3. Token 生成与结束符号判定</h3>
+<p>模型在生成输出时，会逐个“生成 token”（可理解为最小语义单位，如词、字或标点）。生成过程持续进行，直到遇到特定的“结束符号”（如 <code class="notranslate">&lt;/s&gt;</code>、<code class="notranslate">[END]</code> 或模型内部的 EOS 标志），判定输出已完成。</p>
+<blockquote>
+<p>✨ 该机制赋予了语言模型<strong>动态响应能力</strong>——它不会一次性输出全部内容，而是在与用户互动中逐步“思考”并“表达”。</p>
+</blockquote>
+<hr>
+<h2>二、AI Agent 框架</h2>
+<p>AI Agent 并非简单的“问答机器人”，而是一个具备<strong>身份设定、上下文理解、任务规划与工具调用能力</strong>的综合系统。</p>
+<h3>1. 自我介绍与身份设定</h3>
+<p>在启动或与用户首次交互时，AI Agent 会根据预设的角色进行自我介绍。例如：</p>
+<ul>
+<li>“我是小鲁班，一位擅长任务规划与工具调用的智能助手。”</li>
+<li>“您好，我是您的个性化学习伙伴，专注于帮助您高效掌握新知识。”</li>
+</ul>
+<blockquote>
+<p>🎯 身份设定决定了 AI Agent 的语气、行为风格与任务处理方式，使其更具个性化与可信度。</p>
+</blockquote>
+<h3>2. 读取 System Prompt 并整合上下文</h3>
+<p>System Prompt 是 AI Agent 的“行为说明书”，它定义了 Agent 的目标、角色、约束条件与交互规则。例如：</p>
+<ul>
+<li>“你是一个高效的任务执行者，需优先完成用户交付的任务。”</li>
+<li>“请以简洁、准确的方式回应，避免冗余信息。”</li>
+</ul>
+<p>在每次交互中，AI Agent 会：</p>
+<ul>
+<li>读取并解析 System Prompt；</li>
+<li>结合当前用户输入与历史对话；</li>
+<li>构建一个完整的、上下文连贯的“理解场景”；</li>
+<li>作为后续任务规划与生成的依据。</li>
+</ul>
+<blockquote>
+<p>🔄 这一过程实现了“从被动响应到主动理解”的跨越。</p>
+</blockquote>
+<h3>3. 使用工具完成任务指令</h3>
+<p>AI Agent 的真正价值，在于它能<strong>调用外部工具</strong>来完成复杂任务，而非仅限于文本生成。</p>
+<p>例如，当用户说：“帮我查一下北京明天的天气。”<br>
+AI Agent 会：</p>
+<ul>
+<li>分析任务意图（获取天气信息）；</li>
+<li>调用“天气查询工具”；</li>
+<li>获取实时数据并转化为自然语言回复：“明天北京天气晴，气温 18–26℃，适合外出。”</li>
+</ul>
+<blockquote>
+<p>🔧 工具调用能力使 AI Agent 成为“智能代理”——它不仅能说，还能做，真正实现“自主运行”。</p>
+</blockquote>
+<hr>
+<h2>结语：AI Agent——从语言理解走向真实行动的智能体</h2>
+<p>AI Agent 的出现，标志着人工智能从“能说会道”迈向“能思能行”的新阶段。它依托语言模型的文本生成能力，通过 system prompt 明确行为边界，借助工具调用实现真实世界中的任务执行。</p>
+<p>未来，随着模型理解力的增强、工具生态的丰富与物理交互能力的突破，AI Agent 将不再只是“虚拟助手”，而是成为我们生活中真正意义上的“智能伙伴”——懂你所想，做你所需，助你所成。</p>
+<blockquote>
+<p>✨ <strong>AI Agent 的终极意义，不在于它有多聪明，而在于它能否真正理解你，并为你创造价值。</strong></p>
+</blockquote></div>
+<div style="font-size:small;margin-top:8px;float:right;"></div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://sin210.github.io">Frostnova</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行 "+diffDay+" 天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.disabled=true;
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","sin210/sin210.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+
+
+</script>
+<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekTOC.js'></script><script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>
+
+</html>

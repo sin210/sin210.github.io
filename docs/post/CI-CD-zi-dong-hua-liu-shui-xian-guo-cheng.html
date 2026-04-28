@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/264126132?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="### 一、先搞懂核心概念（避免混淆）
+- **CI（持续集成）**：开发人员频繁将代码合并到主干，每次合并后自动执行「编译、测试、代码检查」，快速发现问题，核心目标是**减少集成风险**；
+- **CD（持续交付/持续部署）**：
+  - 持续交付：CI通过后，自动将代码打包成可部署的制品（如Docker镜像），手动触发部署到测试/生产环境；
+  - 持续部署：交付环节完全自动化，制品直接部署到生产环境（适合互联网高频迭代场景）；
+- 流水线核心：**代码变更→自动触发→多阶段验证→自动部署**，全程无需人工干预（或仅少量人工审批）。">
+<meta property="og:title" content="CI/CD自动化流水线过程">
+<meta property="og:description" content="### 一、先搞懂核心概念（避免混淆）
+- **CI（持续集成）**：开发人员频繁将代码合并到主干，每次合并后自动执行「编译、测试、代码检查」，快速发现问题，核心目标是**减少集成风险**；
+- **CD（持续交付/持续部署）**：
+  - 持续交付：CI通过后，自动将代码打包成可部署的制品（如Docker镜像），手动触发部署到测试/生产环境；
+  - 持续部署：交付环节完全自动化，制品直接部署到生产环境（适合互联网高频迭代场景）；
+- 流水线核心：**代码变更→自动触发→多阶段验证→自动部署**，全程无需人工干预（或仅少量人工审批）。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://sin210.github.io/post/CI-CD-zi-dong-hua-liu-shui-xian-guo-cheng.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/264126132?v=4&size=64">
+<title>CI/CD自动化流水线过程</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+.copy-feedback {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    color: var(--color-fg-on-emphasis);
+    background-color: var(--color-fg-muted);
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">CI/CD自动化流水线过程</h1>
+<div class="title-right">
+    <a href="https://sin210.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/sin210/sin210.github.io/issues/3" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h3>一、先搞懂核心概念（避免混淆）</h3>
+<ul>
+<li><strong>CI（持续集成）</strong>：开发人员频繁将代码合并到主干，每次合并后自动执行「编译、测试、代码检查」，快速发现问题，核心目标是<strong>减少集成风险</strong>；</li>
+<li><strong>CD（持续交付/持续部署）</strong>：
+<ul>
+<li>持续交付：CI通过后，自动将代码打包成可部署的制品（如Docker镜像），手动触发部署到测试/生产环境；</li>
+<li>持续部署：交付环节完全自动化，制品直接部署到生产环境（适合互联网高频迭代场景）；</li>
+</ul>
+</li>
+<li>流水线核心：<strong>代码变更→自动触发→多阶段验证→自动部署</strong>，全程无需人工干预（或仅少量人工审批）。</li>
+</ul>
+<h3>二、CI/CD流水线通用流程（分7个核心阶段）</h3>
+<p>不管用Jenkins、GitLab CI、GitHub Actions还是阿里云效，流水线的核心阶段都一致，以下是最完整的通用流程（按执行顺序）：</p>
+<div class="highlight highlight-source-mermaid"><pre class="notranslate"><span class="pl-k">graph</span> <span class="pl-c1">TD</span>
+    <span class="pl-ent">A</span><span class="pl-s"><span class="pl-pds"><span class="pl-sg">[</span></span>代码提交/合并<span class="pl-pds"><span class="pl-sg">]</span></span></span> <span class="pl-k">--&gt;</span> <span class="pl-ent">B</span><span class="pl-s"><span class="pl-pds"><span class="pl-sg">[</span></span>代码拉取与准备<span class="pl-pds"><span class="pl-sg">]</span></span></span>
+    <span class="pl-ent">B</span> <span class="pl-k">--&gt;</span> <span class="pl-ent">C</span><span class="pl-s"><span class="pl-pds"><span class="pl-sg">[</span></span>代码质量检查<span class="pl-pds"><span class="pl-sg">]</span></span></span>
+    <span class="pl-ent">C</span> <span class="pl-k">--&gt;</span> <span class="pl-ent">D</span><span class="pl-s"><span class="pl-pds"><span class="pl-sg">[</span></span>构建与打包<span class="pl-pds"><span class="pl-sg">]</span></span></span>
+    <span class="pl-ent">D</span> <span class="pl-k">--&gt;</span> <span class="pl-ent">E</span><span class="pl-s"><span class="pl-pds"><span class="pl-sg">[</span></span>自动化测试<span class="pl-pds"><span class="pl-sg">]</span></span></span>
+    <span class="pl-ent">E</span> <span class="pl-k">--&gt;</span> <span class="pl-ent">F</span><span class="pl-s"><span class="pl-pds"><span class="pl-sg">[</span></span>制品推送（镜像/包）<span class="pl-pds"><span class="pl-sg">]</span></span></span>
+    <span class="pl-ent">F</span> <span class="pl-k">--&gt;</span> <span class="pl-ent">G</span><span class="pl-s"><span class="pl-pds"><span class="pl-sg">[</span></span>部署到目标环境<span class="pl-pds"><span class="pl-sg">]</span></span></span>
+    <span class="pl-ent">G</span> <span class="pl-k">--&gt;</span> <span class="pl-ent">H</span><span class="pl-s"><span class="pl-pds"><span class="pl-sg">[</span></span>验证与监控<span class="pl-pds"><span class="pl-sg">]</span></span></span></pre></div>
+<h4>阶段1：代码提交/合并（触发点）</h4>
+<ul>
+<li>触发条件：开发人员将代码<code class="notranslate">git push</code>到仓库（如GitLab/GitHub），或合并PR/MR到主干分支（如main/dev）；</li>
+<li>关键配置：可设置“仅指定分支（如main）触发”“跳过CI的提交（加[skip ci]注释）”，避免无效触发。</li>
+</ul>
+<h4>阶段2：代码拉取与准备（环境初始化）</h4>
+<ul>
+<li>核心操作：流水线代理节点拉取最新代码，初始化构建环境（如安装依赖、配置镜像源）；</li>
+<li>示例（GitLab CI）：
+<div class="highlight highlight-source-yaml"><pre class="notranslate"><span class="pl-ent">stages</span>:
+  - <span class="pl-s">prepare</span>
+<span class="pl-ent">prepare_job</span>:
+  <span class="pl-ent">stage</span>: <span class="pl-s">prepare</span>
+  <span class="pl-ent">script</span>:
+    - <span class="pl-s">git checkout $CI_COMMIT_BRANCH  </span><span class="pl-c"><span class="pl-c">#</span> 拉取当前分支代码</span>
+    - <span class="pl-s">pip install -r requirements.txt  </span><span class="pl-c"><span class="pl-c">#</span> 安装Python依赖</span>
+    - <span class="pl-s">docker login -u $USER -p $PASS $REGISTRY  </span><span class="pl-c"><span class="pl-c">#</span> 登录镜像仓库</span></pre></div>
+</li>
+</ul>
+<h4>阶段3：代码质量检查（提前发现问题）</h4>
+<ul>
+<li>核心操作：执行代码规范、安全扫描，避免低质量代码进入后续环节；</li>
+<li>常用工具：
+<ul>
+<li>代码规范：ESLint（前端）、Pylint（Python）、SonarQube（多语言）；</li>
+<li>安全扫描：SAST（静态扫描，如GitLab SAST）、Dependency-Check（依赖漏洞）；</li>
+</ul>
+</li>
+<li>关键：设置“检查不通过则终止流水线”，比如代码覆盖率低于80%直接失败。</li>
+</ul>
+<h4>阶段4：构建与打包（生成可运行制品）</h4>
+<ul>
+<li>核心操作：将代码编译/打包成可部署的制品，不同语言/场景制品类型不同；
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>场景</th>
+<th>制品类型</th>
+<th>常用工具</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>前端项目</td>
+<td>静态资源包（dist）</td>
+<td>npm run build</td>
+</tr>
+<tr>
+<td>后端项目</td>
+<td>JAR/WAR包</td>
+<td>Maven/Gradle</td>
+</tr>
+<tr>
+<td>容器化部署</td>
+<td>Docker镜像</td>
+<td>docker build</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+</li>
+<li>示例（构建Docker镜像）：
+<div class="highlight highlight-source-shell"><pre class="notranslate">docker build -t <span class="pl-smi">$REGISTRY</span>/my-app:<span class="pl-smi">$CI_COMMIT_SHA</span> <span class="pl-c1">.</span>  <span class="pl-c"><span class="pl-c">#</span> 用提交哈希做镜像标签，避免重复</span></pre></div>
+</li>
+</ul>
+<h4>阶段5：自动化测试（验证功能正确性）</h4>
+<ul>
+<li>核心操作：执行多维度测试，确保制品功能正常，测试不通过则终止流水线；
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>测试类型</th>
+<th>作用</th>
+<th>常用工具</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单元测试</td>
+<td>测试单个函数/模块</td>
+<td>JUnit（Java）、pytest（Python）</td>
+</tr>
+<tr>
+<td>接口测试</td>
+<td>测试API接口</td>
+<td>Postman/Newman、JMeter</td>
+</tr>
+<tr>
+<td>集成测试</td>
+<td>测试模块间交互</td>
+<td>TestNG、pytest</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+</li>
+<li>关键：测试结果生成报告（如JUnit格式），便于排查问题。</li>
+</ul>
+<h4>阶段6：制品推送（存储与版本管理）</h4>
+<ul>
+<li>核心操作：将构建好的制品推送到仓库，便于后续部署；
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>制品类型</th>
+<th>仓库类型</th>
+<th>示例命令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Docker镜像</td>
+<td>镜像仓库（Harbor/阿里云）</td>
+<td>docker push $REGISTRY/my-app:$TAG</td>
+</tr>
+<tr>
+<td>软件包</td>
+<td>包仓库（Nexus/PyPI）</td>
+<td>mvn deploy</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+</li>
+<li>关键：制品打唯一标签（如提交哈希、版本号），避免覆盖，便于回滚。</li>
+</ul>
+<h4>阶段7：部署到目标环境（核心交付环节）</h4>
+<ul>
+<li>核心操作：将制品部署到对应环境，按“测试→预发→生产”逐步推进，生产环境可加人工审批；
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>环境</th>
+<th>部署方式</th>
+<th>适用工具</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>测试环境</td>
+<td>自动部署</td>
+<td>Jenkins、GitLab CI</td>
+</tr>
+<tr>
+<td>生产环境</td>
+<td>人工审批后部署</td>
+<td>GitLab CI/CD 审批、ArgoCD</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+</li>
+<li>示例（部署到K8s）：
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 替换K8s部署文件中的镜像标签</span>
+sed -i <span class="pl-s"><span class="pl-pds">"</span>s|IMAGE_TAG|<span class="pl-smi">$CI_COMMIT_SHA</span>|g<span class="pl-pds">"</span></span> deploy.yaml
+<span class="pl-c"><span class="pl-c">#</span> 部署到K8s集群</span>
+kubectl apply -f deploy.yaml -n <span class="pl-c1">test</span></pre></div>
+</li>
+</ul>
+<h4>阶段8：验证与监控（收尾+兜底）</h4>
+<ul>
+<li>核心操作：部署后验证应用是否正常运行，同时监控运行状态；
+<ul>
+<li>验证：检查应用端口是否通、接口返回是否正常（<code class="notranslate">curl http://$IP/health</code>）；</li>
+<li>监控：接入Prometheus/Grafana，监控CPU/内存/接口响应时间，异常则告警；</li>
+</ul>
+</li>
+<li>回滚机制：验证失败时，自动回滚到上一个稳定版本（如<code class="notranslate">kubectl rollout undo deployment/my-app</code>）。</li>
+</ul>
+<h3>三、主流CI/CD工具对比（选工具参考）</h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>工具</th>
+<th>优势</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Jenkins</td>
+<td>插件丰富、高度自定义</td>
+<td>复杂场景、多工具集成</td>
+</tr>
+<tr>
+<td>GitLab CI/CD</td>
+<td>与GitLab深度集成、无需额外部署</td>
+<td>已用GitLab的团队</td>
+</tr>
+<tr>
+<td>GitHub Actions</td>
+<td>与GitHub集成、配置简单</td>
+<td>开源项目、GitHub仓库</td>
+</tr>
+<tr>
+<td>阿里云效/华为云DevOps</td>
+<td>云原生、开箱即用</td>
+<td>国内云厂商用户</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<h3>四、实战示例（GitLab CI/CD完整流水线配置）</h3>
+<p>以下是一个Python应用+Docker+K8s的完整<code class="notranslate">.gitlab-ci.yml</code>配置，覆盖核心流程：</p>
+<div class="highlight highlight-source-yaml"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 定义流水线阶段</span>
+<span class="pl-ent">stages</span>:
+  - <span class="pl-s">prepare</span>
+  - <span class="pl-s">lint</span>
+  - <span class="pl-s">build</span>
+  - <span class="pl-s">test</span>
+  - <span class="pl-s">deploy</span>
+
+<span class="pl-c"><span class="pl-c">#</span> 全局变量</span>
+<span class="pl-ent">variables</span>:
+  <span class="pl-ent">REGISTRY</span>: <span class="pl-s">harbor.example.com</span>
+  <span class="pl-ent">APP_NAME</span>: <span class="pl-s">my-python-app</span>
+  <span class="pl-ent">TAG</span>: <span class="pl-s">$CI_COMMIT_SHORT_SHA  </span><span class="pl-c"><span class="pl-c">#</span> 用短提交哈希做标签</span>
+
+<span class="pl-c"><span class="pl-c">#</span> 阶段1：环境准备</span>
+<span class="pl-ent">prepare</span>:
+  <span class="pl-ent">stage</span>: <span class="pl-s">prepare</span>
+  <span class="pl-ent">script</span>:
+    - <span class="pl-s">pip install -r requirements.txt</span>
+    - <span class="pl-s">docker login -u $HARBOR_USER -p $HARBOR_PASS $REGISTRY</span>
+
+<span class="pl-c"><span class="pl-c">#</span> 阶段2：代码检查</span>
+<span class="pl-ent">lint</span>:
+  <span class="pl-ent">stage</span>: <span class="pl-s">lint</span>
+  <span class="pl-ent">script</span>:
+    - <span class="pl-s">pylint ./src --fail-under=8.0  </span><span class="pl-c"><span class="pl-c">#</span> 代码评分低于8分则失败</span>
+    - <span class="pl-s">dependency-check --scan ./src --format HTML --out dependency-report.html</span>
+
+<span class="pl-c"><span class="pl-c">#</span> 阶段3：构建镜像</span>
+<span class="pl-ent">build</span>:
+  <span class="pl-ent">stage</span>: <span class="pl-s">build</span>
+  <span class="pl-ent">script</span>:
+    - <span class="pl-s">docker build -t $REGISTRY/$APP_NAME:$TAG .</span>
+    - <span class="pl-s">docker push $REGISTRY/$APP_NAME:$TAG</span>
+
+<span class="pl-c"><span class="pl-c">#</span> 阶段4：单元测试</span>
+<span class="pl-ent">test</span>:
+  <span class="pl-ent">stage</span>: <span class="pl-s">test</span>
+  <span class="pl-ent">script</span>:
+    - <span class="pl-s">pytest ./tests/ --junitxml=test-report.xml</span>
+  <span class="pl-ent">artifacts</span>:
+    <span class="pl-ent">reports</span>:
+      <span class="pl-ent">junit</span>: <span class="pl-s">test-report.xml  </span><span class="pl-c"><span class="pl-c">#</span> 上传测试报告</span>
+
+<span class="pl-c"><span class="pl-c">#</span> 阶段5：部署到测试环境</span>
+<span class="pl-ent">deploy</span>:
+  <span class="pl-ent">stage</span>: <span class="pl-s">deploy</span>
+  <span class="pl-ent">only</span>:
+    - <span class="pl-s">main  </span><span class="pl-c"><span class="pl-c">#</span> 仅main分支触发部署</span>
+  <span class="pl-ent">script</span>:
+    - <span class="pl-s">sed -i "s|{{IMAGE_TAG}}|$TAG|g" k8s/deploy.yaml</span>
+    - <span class="pl-s">kubectl apply -f k8s/deploy.yaml -n test</span>
+    - <span class="pl-s">sleep 10</span>
+    - <span class="pl-s">kubectl rollout status deployment/$APP_NAME -n test  </span><span class="pl-c"><span class="pl-c">#</span> 验证部署状态</span></pre></div>
+<h3>总结</h3>
+<ol>
+<li>CI/CD流水线核心是**“自动化替代人工”**，核心流程为：代码提交→环境准备→代码检查→构建打包→测试→制品推送→部署→验证；</li>
+<li>关键控制点：分支触发规则、质量门禁（检查不通过终止）、制品版本唯一、部署后验证+回滚机制；</li>
+<li>工具选择：中小团队优先用GitLab CI/GitHub Actions（与代码仓库集成），复杂场景用Jenkins。</li>
+</ol>
+<hr>
+<h2>完整口述流程（带工具 + 步骤）</h2>
+<p>我理解的 CI/CD 自动化流水线，一共分为 <strong>8 个阶段</strong>，每个阶段都有对应的工具，全程自动化：</p>
+<ol>
+<li>
+<p><strong>代码提交与触发</strong><br>
+开发人员写完代码，通过 <strong>Git</strong> 提交到代码仓库，比如 <strong>GitLab、GitHub、Gitee</strong>。<br>
+只要代码一合并或推送，就会自动触发流水线，不需要人工操作。</p>
+</li>
+<li>
+<p><strong>拉取代码与环境准备</strong><br>
+流水线开始后，会通过 <strong>Git</strong> 自动拉取最新代码。<br>
+然后在构建机上准备环境，比如安装 <strong>JDK、Node.js、Maven、Python</strong> 等依赖，<br>
+这一步一般用 <strong>Jenkins、GitLab CI、GitHub Actions</strong> 来调度执行。</p>
+</li>
+<li>
+<p><strong>代码质量与安全扫描</strong><br>
+代码拉下来后，先做质量检查：</p>
+<ul>
+<li>用 <strong>SonarQube</strong> 做代码规范、bug、坏味道检测</li>
+<li>用 <strong>依赖检查工具</strong> 扫描第三方包漏洞<br>
+不通过的话，流水线直接终止，不让问题进入下一步。</li>
+</ul>
+</li>
+<li>
+<p><strong>编译构建与打包</strong><br>
+检查通过后开始构建：</p>
+<ul>
+<li>Java 项目用 <strong>Maven / Gradle</strong> 打成 Jar 包</li>
+<li>前端用 <strong>npm / yarn</strong> 构建出 dist 静态包</li>
+<li>然后用 <strong>Docker</strong> 构建成镜像，生成可直接运行的容器镜像。</li>
+</ul>
+</li>
+<li>
+<p><strong>自动化测试</strong><br>
+构建完成后自动跑测试：</p>
+<ul>
+<li>单元测试用 <strong>JUnit、Pytest</strong></li>
+<li>接口测试用 <strong>Postman、JMeter</strong><br>
+测试不通过，流水线失败，保证上线质量。</li>
+</ul>
+</li>
+<li>
+<p><strong>制品上传（仓库存储）</strong><br>
+测试通过后，把 Docker 镜像推送到镜像仓库：</p>
+<ul>
+<li>常用 <strong>Harbor、阿里云镜像仓库、Docker Hub</strong><br>
+每个镜像都带唯一版本号，方便回滚。</li>
+</ul>
+</li>
+<li>
+<p><strong>自动部署发布</strong><br>
+部署一般分环境：测试环境 → 预发 → 生产。</p>
+<ul>
+<li>部署工具用 <strong>Jenkins、GitLab CI、ArgoCD</strong></li>
+<li>如果是 <strong>K8s 环境</strong>，就用 <strong>kubectl</strong> 执行部署文件<br>
+生产环境一般会加<strong>人工审批</strong>，确认无误再发布。</li>
+</ul>
+</li>
+<li>
+<p><strong>部署验证与回滚</strong><br>
+部署完成后，自动检查服务是否正常启动、接口是否可用。<br>
+如果有问题，<strong>自动回滚</strong>到上一个稳定版本，保证业务不中断。<br>
+同时用 <strong>Prometheus + Grafana</strong> 监控服务运行状态。</p>
+</li>
+</ol>
+<hr>
+<h1>最后总结一句（面试官超爱）</h1>
+<p><strong>整个 CI/CD 流水线，从代码提交到构建、测试、部署、监控全部自动化，用 Git、Jenkins、Docker、K8s、Sonar、Harbor 这些工具配合，大大提高发布效率，减少人为失误，保证线上稳定。</strong></p></div>
+<div style="font-size:small;margin-top:8px;float:right;"></div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://sin210.github.io">Frostnova</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行 "+diffDay+" 天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z', 'copy': 'M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z', 'check': 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.disabled=true;
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","sin210/sin210.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const createClipboardHTML = (codeContent, additionalClasses = '') => `
+        <pre class="notranslate"><code class="notranslate">${codeContent}</code></pre>
+        <div class="clipboard-container position-absolute right-0 top-0 ${additionalClasses}">
+            <clipboard-copy class="ClipboardButton btn m-2 p-0" role="button" style="display: inherit;">
+                <svg height="16" width="16" class="octicon octicon-copy m-2"><path d="${IconList["copy"]}"></path></svg>
+                <svg height="16" width="16" class="octicon octicon-check color-fg-success m-2 d-none"><path d="${IconList["check"]}"></path></svg>
+            </clipboard-copy>
+            <div class="copy-feedback">Copied!</div>
+        </div>
+    `;
+
+    const handleCodeElements = (selector = '') => {
+        document.querySelectorAll(selector).forEach(codeElement => {
+            const codeContent = codeElement.innerHTML;
+            const newStructure = document.createElement('div');
+            newStructure.className = 'snippet-clipboard-content position-relative overflow-auto';
+            newStructure.innerHTML = createClipboardHTML(codeContent);
+
+            const parentElement = codeElement.parentElement;
+            if (selector.includes('highlight')) {
+                parentElement.insertBefore(newStructure, codeElement.nextSibling);
+                parentElement.removeChild(codeElement);
+            } else {
+                parentElement.parentElement.replaceChild(newStructure, parentElement);
+            }
+        });
+    };
+
+    handleCodeElements('pre.notranslate > code.notranslate');
+    handleCodeElements('div.highlight > pre.notranslate');
+
+    let currentFeedback = null;
+    document.querySelectorAll('clipboard-copy').forEach(copyButton => {
+        copyButton.addEventListener('click', () => {
+            const codeContent = copyButton.closest('.snippet-clipboard-content').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyIcon = copyButton.querySelector('.octicon-copy');
+            const checkIcon = copyButton.querySelector('.octicon-check');
+            const copyFeedback = copyButton.nextElementSibling;
+
+            if (currentFeedback && currentFeedback !== copyFeedback) {currentFeedback.style.display = 'none';}
+            currentFeedback = copyFeedback;
+
+            copyIcon.classList.add('d-none');
+            checkIcon.classList.remove('d-none');
+            copyFeedback.style.display = 'block';
+            copyButton.style.borderColor = 'var(--color-success-fg)';
+
+            setTimeout(() => {
+                copyIcon.classList.remove('d-none');
+                checkIcon.classList.add('d-none');
+                copyFeedback.style.display = 'none';
+                copyButton.style.borderColor = '';
+            }, 2000);
+        });
+    });
+});
+
+</script>
+<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekTOC.js'></script><script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>
+
+</html>

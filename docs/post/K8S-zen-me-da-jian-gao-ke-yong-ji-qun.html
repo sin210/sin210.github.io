@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/264126132?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="### 一、先明确：K8s 高可用集群核心架构（3/5节点，推荐3节点）
+高可用的核心是**控制平面（Master）多副本** + **etcd 集群高可用**（etcd 是 K8s 核心数据库，需至少3节点），避免单点故障。">
+<meta property="og:title" content="K8S怎么搭建高可用集群">
+<meta property="og:description" content="### 一、先明确：K8s 高可用集群核心架构（3/5节点，推荐3节点）
+高可用的核心是**控制平面（Master）多副本** + **etcd 集群高可用**（etcd 是 K8s 核心数据库，需至少3节点），避免单点故障。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://sin210.github.io/post/K8S-zen-me-da-jian-gao-ke-yong-ji-qun.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/264126132?v=4&size=64">
+<title>K8S怎么搭建高可用集群</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+.copy-feedback {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    color: var(--color-fg-on-emphasis);
+    background-color: var(--color-fg-muted);
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">K8S怎么搭建高可用集群</h1>
+<div class="title-right">
+    <a href="https://sin210.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/sin210/sin210.github.io/issues/10" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h3>一、先明确：K8s 高可用集群核心架构（3/5节点，推荐3节点）</h3>
+<p>高可用的核心是<strong>控制平面（Master）多副本</strong> + <strong>etcd 集群高可用</strong>（etcd 是 K8s 核心数据库，需至少3节点），避免单点故障。</p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>节点角色</th>
+<th>数量</th>
+<th>硬件/系统要求（最低）</th>
+<th>核心组件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>控制平面（Master）</td>
+<td>3台</td>
+<td>2核4G/统信UOS/CentOS 7+</td>
+<td>kube-apiserver、kube-controller-manager、kube-scheduler、etcd</td>
+</tr>
+<tr>
+<td>工作节点（Node）</td>
+<td>2+台</td>
+<td>4核8G/统信UOS/CentOS 7+</td>
+<td>kubelet、kube-proxy、containerd</td>
+</tr>
+<tr>
+<td>负载均衡器（LB）</td>
+<td>1台</td>
+<td>1核2G/任意Linux</td>
+<td>nginx/haproxy（转发apiserver请求）</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<blockquote>
+<p>注：新手可先用 <strong>3节点混合部署</strong>（每台既做Master又做Node），减少机器数量，生产环境建议分离部署。</p>
+</blockquote>
+<h3>二、环境准备（所有节点执行）</h3>
+<h4>1. 系统基础配置（关闭防火墙/SELinux/swap）</h4>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 1. 关闭防火墙</span>
+systemctl stop firewalld <span class="pl-k">&amp;&amp;</span> systemctl disable firewalld
+
+<span class="pl-c"><span class="pl-c">#</span> 2. 关闭SELinux（统信UOS/CentOS通用）</span>
+setenforce 0
+sed -i <span class="pl-s"><span class="pl-pds">'</span>s/^SELINUX=enforcing$/SELINUX=disabled/<span class="pl-pds">'</span></span> /etc/selinux/config
+
+<span class="pl-c"><span class="pl-c">#</span> 3. 关闭swap（K8s要求必须关闭）</span>
+swapoff -a
+sed -i <span class="pl-s"><span class="pl-pds">'</span>/swap/s/^/#/<span class="pl-pds">'</span></span> /etc/fstab
+
+<span class="pl-c"><span class="pl-c">#</span> 4. 配置内核参数（开启IPVS/网桥转发）</span>
+cat <span class="pl-k">&gt;</span> /etc/sysctl.d/k8s.conf <span class="pl-s"><span class="pl-k">&lt;&lt;</span> <span class="pl-k">EOF</span></span>
+<span class="pl-s">net.bridge.bridge-nf-call-ip6tables = 1</span>
+<span class="pl-s">net.bridge.bridge-nf-call-iptables = 1</span>
+<span class="pl-s">net.ipv4.ip_forward = 1</span>
+<span class="pl-s"><span class="pl-k">EOF</span></span>
+sysctl --system
+
+<span class="pl-c"><span class="pl-c">#</span> 5. 配置主机名和hosts（示例：3台Master节点，IP和主机名对应）</span>
+<span class="pl-c"><span class="pl-c">#</span> 以Master1为例，其他节点修改hostname即可</span>
+hostnamectl set-hostname k8s-master01
+cat <span class="pl-k">&gt;&gt;</span> /etc/hosts <span class="pl-s"><span class="pl-k">&lt;&lt;</span> <span class="pl-k">EOF</span></span>
+<span class="pl-s">192.168.1.10 k8s-master01</span>
+<span class="pl-s">192.168.1.11 k8s-master02</span>
+<span class="pl-s">192.168.1.12 k8s-master03</span>
+<span class="pl-s">192.168.1.9  k8s-lb  # 负载均衡器IP</span>
+<span class="pl-s"><span class="pl-k">EOF</span></span>
+
+<span class="pl-c"><span class="pl-c">#</span> 6. 时间同步（高可用核心，所有节点时间必须一致）</span>
+yum install -y chrony
+systemctl start chronyd <span class="pl-k">&amp;&amp;</span> systemctl <span class="pl-c1">enable</span> chronyd
+chronyc sync</pre></div>
+<h4>2. 安装容器运行时（containerd，替代docker）</h4>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 1. 安装依赖</span>
+yum install -y yum-utils device-mapper-persistent-data lvm2
+
+<span class="pl-c"><span class="pl-c">#</span> 2. 添加阿里云镜像源</span>
+yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+
+<span class="pl-c"><span class="pl-c">#</span> 3. 安装containerd</span>
+yum install -y containerd.io
+
+<span class="pl-c"><span class="pl-c">#</span> 4. 配置containerd（生成默认配置并修改）</span>
+containerd config default <span class="pl-k">&gt;</span> /etc/containerd/config.toml
+<span class="pl-c"><span class="pl-c">#</span> 修改sandbox镜像为国内源（关键，避免拉取失败）</span>
+sed -i <span class="pl-s"><span class="pl-pds">'</span>s#k8s.gcr.io/pause#registry.aliyuncs.com/google_containers/pause#g<span class="pl-pds">'</span></span> /etc/containerd/config.toml
+<span class="pl-c"><span class="pl-c">#</span> 启用SystemdCgroup（K8s要求）</span>
+sed -i <span class="pl-s"><span class="pl-pds">'</span>s/SystemdCgroup \= false/SystemdCgroup \= true/g<span class="pl-pds">'</span></span> /etc/containerd/config.toml
+
+<span class="pl-c"><span class="pl-c">#</span> 5. 重启并开机自启</span>
+systemctl restart containerd <span class="pl-k">&amp;&amp;</span> systemctl <span class="pl-c1">enable</span> containerd</pre></div>
+<h4>3. 安装kubeadm/kubelet/kubectl（K8s核心工具）</h4>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 1. 添加阿里云K8s源</span>
+cat <span class="pl-k">&gt;</span> /etc/yum.repos.d/kubernetes.repo <span class="pl-s"><span class="pl-k">&lt;&lt;</span> <span class="pl-k">EOF</span></span>
+<span class="pl-s">[kubernetes]</span>
+<span class="pl-s">name=Kubernetes</span>
+<span class="pl-s">baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/</span>
+<span class="pl-s">enabled=1</span>
+<span class="pl-s">gpgcheck=1</span>
+<span class="pl-s">repo_gpgcheck=1</span>
+<span class="pl-s">gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg</span>
+<span class="pl-s"><span class="pl-k">EOF</span></span>
+
+<span class="pl-c"><span class="pl-c">#</span> 2. 安装指定版本（推荐1.28.x，稳定版）</span>
+yum install -y kubelet-1.28.3 kubeadm-1.28.3 kubectl-1.28.3
+
+<span class="pl-c"><span class="pl-c">#</span> 3. 开机自启kubelet（暂不启动，初始化后自动启动）</span>
+systemctl <span class="pl-c1">enable</span> kubelet</pre></div>
+<h3>三、搭建负载均衡器（LB节点）</h3>
+<p>用于转发所有对 apiserver 的请求到3个Master节点，避免单Master入口故障。这里用 <strong>haproxy</strong> 为例：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 1. 安装haproxy</span>
+yum install -y haproxy
+
+<span class="pl-c"><span class="pl-c">#</span> 2. 修改配置文件 /etc/haproxy/haproxy.cfg</span>
+cat <span class="pl-k">&gt;</span> /etc/haproxy/haproxy.cfg <span class="pl-s"><span class="pl-k">&lt;&lt;</span> <span class="pl-k">EOF</span></span>
+<span class="pl-s">global</span>
+<span class="pl-s">    log         127.0.0.1 local2</span>
+<span class="pl-s">    chroot      /var/lib/haproxy</span>
+<span class="pl-s">    pidfile     /var/run/haproxy.pid</span>
+<span class="pl-s">    maxconn     4000</span>
+<span class="pl-s">    user        haproxy</span>
+<span class="pl-s">    group       haproxy</span>
+<span class="pl-s">    daemon</span>
+<span class="pl-s"></span>
+<span class="pl-s">defaults</span>
+<span class="pl-s">    mode                    http</span>
+<span class="pl-s">    log                     global</span>
+<span class="pl-s">    option                  httplog</span>
+<span class="pl-s">    option                  dontlognull</span>
+<span class="pl-s">    option http-server-close</span>
+<span class="pl-s">    option forwardfor       except 127.0.0.0/8</span>
+<span class="pl-s">    option                  redispatch</span>
+<span class="pl-s">    retries                 3</span>
+<span class="pl-s">    timeout http-request    10s</span>
+<span class="pl-s">    timeout queue           1m</span>
+<span class="pl-s">    timeout connect         10s</span>
+<span class="pl-s">    timeout client          1m</span>
+<span class="pl-s">    timeout server          1m</span>
+<span class="pl-s">    timeout http-keep-alive 10s</span>
+<span class="pl-s">    timeout check           10s</span>
+<span class="pl-s">    maxconn                 3000</span>
+<span class="pl-s"></span>
+<span class="pl-s"># 核心配置：转发8443端口（apiserver端口）到3个Master节点</span>
+<span class="pl-s">frontend k8s-apiserver</span>
+<span class="pl-s">    bind *:8443</span>
+<span class="pl-s">    mode tcp</span>
+<span class="pl-s">    option tcplog</span>
+<span class="pl-s">    default_backend k8s-apiserver-backend</span>
+<span class="pl-s"></span>
+<span class="pl-s">backend k8s-apiserver-backend</span>
+<span class="pl-s">    mode tcp</span>
+<span class="pl-s">    option tcp-check</span>
+<span class="pl-s">    balance roundrobin</span>
+<span class="pl-s">    server k8s-master01 192.168.1.10:6443 check inter 2000 fall 2 rise 2</span>
+<span class="pl-s">    server k8s-master02 192.168.1.11:6443 check inter 2000 fall 2 rise 2</span>
+<span class="pl-s">    server k8s-master03 192.168.1.12:6443 check inter 2000 fall 2 rise 2</span>
+<span class="pl-s"><span class="pl-k">EOF</span></span>
+
+<span class="pl-c"><span class="pl-c">#</span> 3. 启动并开机自启</span>
+systemctl start haproxy <span class="pl-k">&amp;&amp;</span> systemctl <span class="pl-c1">enable</span> haproxy
+<span class="pl-c"><span class="pl-c">#</span> 验证端口监听</span>
+ss -tnlp <span class="pl-k">|</span> grep 8443</pre></div>
+<h3>四、初始化第一个Master节点（k8s-master01）</h3>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 1. 初始化集群（指定LB地址、pod网段、service网段）</span>
+kubeadm init \
+  --control-plane-endpoint <span class="pl-s"><span class="pl-pds">"</span>k8s-lb:8443<span class="pl-pds">"</span></span> <span class="pl-cce">\ </span> <span class="pl-c"><span class="pl-c">#</span> LB的地址和端口</span>
+  --image-repository registry.aliyuncs.com/google_containers <span class="pl-cce">\ </span> <span class="pl-c"><span class="pl-c">#</span> 国内镜像源</span>
+  --kubernetes-version v1.28.3 \
+  --pod-network-cidr=10.244.0.0/16 <span class="pl-cce">\ </span> <span class="pl-c"><span class="pl-c">#</span> flannel网络网段</span>
+  --service-cidr=10.96.0.0/12 \
+  --upload-certs  <span class="pl-c"><span class="pl-c">#</span> 生成证书，用于其他Master节点加入</span>
+
+<span class="pl-c"><span class="pl-c">#</span> 2. 配置kubectl（普通用户权限，可选）</span>
+mkdir -p <span class="pl-smi">$HOME</span>/.kube
+cp -i /etc/kubernetes/admin.conf <span class="pl-smi">$HOME</span>/.kube/config
+chown <span class="pl-s"><span class="pl-pds">$(</span>id -u<span class="pl-pds">)</span></span>:<span class="pl-s"><span class="pl-pds">$(</span>id -g<span class="pl-pds">)</span></span> <span class="pl-smi">$HOME</span>/.kube/config
+
+<span class="pl-c"><span class="pl-c">#</span> 3. 安装网络插件（flannel，必须安装，否则Pod不通）</span>
+kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/v0.22.0/Documentation/kube-flannel.yml
+<span class="pl-c"><span class="pl-c">#</span> 国内源替代（避免访问失败）</span>
+kubectl apply -f https://mirror.ghproxy.com/https://raw.githubusercontent.com/flannel-io/flannel/v0.22.0/Documentation/kube-flannel.yml
+
+<span class="pl-c"><span class="pl-c">#</span> 4. 记录加入命令（关键！其他Master/Node节点需要）</span>
+<span class="pl-c"><span class="pl-c">#</span> 初始化成功后会输出：</span>
+<span class="pl-c"><span class="pl-c">#</span> 1) 加入Master节点的命令（含--control-plane和证书）</span>
+<span class="pl-c"><span class="pl-c">#</span> 2) 加入Node节点的命令</span>
+<span class="pl-c"><span class="pl-c">#</span> 示例：</span>
+<span class="pl-c"><span class="pl-c">#</span> kubeadm join k8s-lb:8443 --token xxx --discovery-token-ca-cert-hash sha256:xxx --control-plane --certificate-key xxx</span>
+<span class="pl-c"><span class="pl-c">#</span> kubeadm join k8s-lb:8443 --token xxx --discovery-token-ca-cert-hash sha256:xxx</span></pre></div>
+<h3>五、加入其他Master节点（k8s-master02/03）</h3>
+<p>在master02和master03上执行第一步初始化成功后输出的<strong>Master加入命令</strong>：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 示例命令（替换为你自己的token和certificate-key）</span>
+kubeadm join k8s-lb:8443 \
+  --token abcdef.0123456789abcdef \
+  --discovery-token-ca-cert-hash sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef \
+  --control-plane \
+  --certificate-key 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef</pre></div>
+<h3>六、加入Node节点（工作节点）</h3>
+<p>在所有Node节点上执行初始化成功后输出的<strong>Node加入命令</strong>：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 示例命令</span>
+kubeadm join k8s-lb:8443 \
+  --token abcdef.0123456789abcdef \
+  --discovery-token-ca-cert-hash sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef</pre></div>
+<h3>七、验证高可用集群</h3>
+<p>在任意Master节点执行以下命令，确认集群状态：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 1. 查看节点状态（所有节点应为Ready）</span>
+kubectl get nodes
+<span class="pl-c"><span class="pl-c">#</span> 输出示例：</span>
+<span class="pl-c"><span class="pl-c">#</span> NAME           STATUS   ROLES           AGE   VERSION</span>
+<span class="pl-c"><span class="pl-c">#</span> k8s-master01   Ready    control-plane   10m   v1.28.3</span>
+<span class="pl-c"><span class="pl-c">#</span> k8s-master02   Ready    control-plane   5m    v1.28.3</span>
+<span class="pl-c"><span class="pl-c">#</span> k8s-master03   Ready    control-plane   3m    v1.28.3</span>
+<span class="pl-c"><span class="pl-c">#</span> k8s-node01     Ready    &lt;none&gt;          1m    v1.28.3</span>
+
+<span class="pl-c"><span class="pl-c">#</span> 2. 查看控制平面组件（所有pod应为Running）</span>
+kubectl get pods -n kube-system
+<span class="pl-c"><span class="pl-c">#</span> 重点看：kube-apiserver、kube-controller-manager、kube-scheduler 各3个副本，etcd 3个副本</span>
+
+<span class="pl-c"><span class="pl-c">#</span> 3. 验证高可用：停止一个Master的apiserver，集群仍可用</span>
+systemctl stop kubelet containerd -n k8s-master01
+<span class="pl-c"><span class="pl-c">#</span> 再次执行kubectl get nodes，集群仍能正常响应，说明高可用生效</span></pre></div>
+<h3>八、运维关键注意事项</h3>
+<ol>
+<li><strong>证书有效期</strong>：K8s证书默认1年，需定期更新（<code class="notranslate">kubeadm certs renew all</code>）；</li>
+<li><strong>etcd备份</strong>：高可用核心是etcd，需定时备份（<code class="notranslate">etcdctl snapshot save</code>）；</li>
+<li><strong>LB高可用</strong>：生产环境LB也需做双机热备（keepalived），避免LB单点故障；</li>
+<li><strong>统信UOS适配</strong>：若用统信UOS，需替换yum源为统信官方源，containerd配置一致；</li>
+<li><strong>网络插件</strong>：除了flannel，也可选用calico（更适合大规模集群）。</li>
+</ol>
+<h3>总结</h3>
+<ol>
+<li>K8s高可用集群核心是<strong>3节点控制平面+etcd集群+LB负载均衡</strong>，避免单点故障；</li>
+<li>搭建流程：环境准备 → LB部署 → 第一个Master初始化 → 其他Master/Node加入 → 验证；</li>
+<li>运维重点关注<strong>证书更新、etcd备份、LB高可用</strong>，确保集群长期稳定运行。</li>
+</ol></div>
+<div style="font-size:small;margin-top:8px;float:right;"></div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://sin210.github.io">Frostnova</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行 "+diffDay+" 天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z', 'copy': 'M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z', 'check': 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.disabled=true;
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","sin210/sin210.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const createClipboardHTML = (codeContent, additionalClasses = '') => `
+        <pre class="notranslate"><code class="notranslate">${codeContent}</code></pre>
+        <div class="clipboard-container position-absolute right-0 top-0 ${additionalClasses}">
+            <clipboard-copy class="ClipboardButton btn m-2 p-0" role="button" style="display: inherit;">
+                <svg height="16" width="16" class="octicon octicon-copy m-2"><path d="${IconList["copy"]}"></path></svg>
+                <svg height="16" width="16" class="octicon octicon-check color-fg-success m-2 d-none"><path d="${IconList["check"]}"></path></svg>
+            </clipboard-copy>
+            <div class="copy-feedback">Copied!</div>
+        </div>
+    `;
+
+    const handleCodeElements = (selector = '') => {
+        document.querySelectorAll(selector).forEach(codeElement => {
+            const codeContent = codeElement.innerHTML;
+            const newStructure = document.createElement('div');
+            newStructure.className = 'snippet-clipboard-content position-relative overflow-auto';
+            newStructure.innerHTML = createClipboardHTML(codeContent);
+
+            const parentElement = codeElement.parentElement;
+            if (selector.includes('highlight')) {
+                parentElement.insertBefore(newStructure, codeElement.nextSibling);
+                parentElement.removeChild(codeElement);
+            } else {
+                parentElement.parentElement.replaceChild(newStructure, parentElement);
+            }
+        });
+    };
+
+    handleCodeElements('pre.notranslate > code.notranslate');
+    handleCodeElements('div.highlight > pre.notranslate');
+
+    let currentFeedback = null;
+    document.querySelectorAll('clipboard-copy').forEach(copyButton => {
+        copyButton.addEventListener('click', () => {
+            const codeContent = copyButton.closest('.snippet-clipboard-content').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyIcon = copyButton.querySelector('.octicon-copy');
+            const checkIcon = copyButton.querySelector('.octicon-check');
+            const copyFeedback = copyButton.nextElementSibling;
+
+            if (currentFeedback && currentFeedback !== copyFeedback) {currentFeedback.style.display = 'none';}
+            currentFeedback = copyFeedback;
+
+            copyIcon.classList.add('d-none');
+            checkIcon.classList.remove('d-none');
+            copyFeedback.style.display = 'block';
+            copyButton.style.borderColor = 'var(--color-success-fg)';
+
+            setTimeout(() => {
+                copyIcon.classList.remove('d-none');
+                checkIcon.classList.add('d-none');
+                copyFeedback.style.display = 'none';
+                copyButton.style.borderColor = '';
+            }, 2000);
+        });
+    });
+});
+
+</script>
+<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekTOC.js'></script><script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>
+
+</html>

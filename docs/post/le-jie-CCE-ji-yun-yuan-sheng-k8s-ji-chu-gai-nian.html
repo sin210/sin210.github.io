@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/264126132?v=4&size=64"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="了解华为云云容器引擎的产品优势和应用场景，有助于您更准确地匹配实际业务，更快速地选择所需的容器服务，让您的业务高效上云。">
+<meta property="og:title" content="了解CCE及云原生k8s基础概念">
+<meta property="og:description" content="了解华为云云容器引擎的产品优势和应用场景，有助于您更准确地匹配实际业务，更快速地选择所需的容器服务，让您的业务高效上云。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://sin210.github.io/post/le-jie-CCE-ji-yun-yuan-sheng-k8s-ji-chu-gai-nian.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/264126132?v=4&size=64">
+<title>了解CCE及云原生k8s基础概念</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">了解CCE及云原生k8s基础概念</h1>
+<div class="title-right">
+    <a href="https://sin210.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/sin210/sin210.github.io/issues/69" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><p>了解华为云云容器引擎的产品优势和应用场景，有助于您更准确地匹配实际业务，更快速地选择所需的容器服务，让您的业务高效上云。</p>
+<h3>1.1. 产品介绍</h3>
+<h4>1.1.1. 什么是云容器引擎</h4>
+<p>云容器引擎（Cloud Container Engine，简称CCE）提供高度可扩展的、高性能的企业级Kubernetes集群，支持运行Docker容器。借助云容器引擎，您可以在云上轻松部署、管理和扩展容器化应用程序。</p>
+<p><strong>1、为什么选择云容器引擎？</strong></p>
+<p>云容器引擎深度整合高性能的计算（ECS/BMS）、网络（VPC/EIP/ELB）、存储（EVS/OBS/SFS）等服务，并支持GPU、NPU、ARM等异构计算架构，支持多可用区（Available Zone，简称AZ）、多区域（Region）容灾等技术构建高可用Kubernetes集群。</p>
+<p>华为云是全球首批Kubernetes认证服务提供商（Kubernetes Certified Service Provider，KCSP），是国内最早投入Kubernetes社区的厂商，是容器开源社区主要贡献者和容器生态领导者。华为云也是CNCF云原生计算基金会的创始成员及白金会员，云容器引擎是全球首批通过CNCF基金会Kubernetes一致性认证的容器服务。</p>
+<p><strong>2、产品架构</strong><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/47bb10be6bd067eecbb6cdfe02a71e98151fa790aa10b73f47a80afcab42373b/68747470733a2f2f737570706f72742e687561776569636c6f75642e636f6d2f70726f64756374646573632d6363652f7a682d636e5f696d6167655f303030303030323130363536313231332e706e67"><img src="https://camo.githubusercontent.com/47bb10be6bd067eecbb6cdfe02a71e98151fa790aa10b73f47a80afcab42373b/68747470733a2f2f737570706f72742e687561776569636c6f75642e636f6d2f70726f64756374646573632d6363652f7a682d636e5f696d6167655f303030303030323130363536313231332e706e67" alt="demo1" data-canonical-src="https://support.huaweicloud.com/productdesc-cce/zh-cn_image_0000002106561213.png" style="max-width: 100%;"></a><br>
+<strong>3、访问方式</strong><br>
+<a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/e69d22aab46b3f2957779781e64518b6739619d07cc87a0790de7640b7bf14b0/68747470733a2f2f737570706f72742e687561776569636c6f75642e636f6d2f757365726d616e75616c2d6363652f7a682d636e5f696d6167655f303030303030323334323132343938322e706e67"><img src="https://camo.githubusercontent.com/e69d22aab46b3f2957779781e64518b6739619d07cc87a0790de7640b7bf14b0/68747470733a2f2f737570706f72742e687561776569636c6f75642e636f6d2f757365726d616e75616c2d6363652f7a682d636e5f696d6167655f303030303030323334323132343938322e706e67" alt="demo2" data-canonical-src="https://support.huaweicloud.com/usermanual-cce/zh-cn_image_0000002342124982.png" style="max-width: 100%;"></a></p>
+<h4>1.1.2. 产品优势</h4>
+<p><strong>1、云容器引擎的优势</strong></p>
+<p>云容器引擎是基于业界主流的Docker和Kubernetes开源技术构建的容器服务，提供众多契合企业大规模容器集群场景的功能，在系统可靠性、高性能、开源社区兼容性等多个方面具有独特的优势，满足企业在构建容器云方面的各种需求。</p>
+<p><strong>1）简单易用</strong></p>
+<ul>
+<li>通过WEB界面一键创建Kubernetes集群，支持管理虚拟机节点或裸金属节点，支持虚拟机与物理机混用场景。</li>
+<li>一站式自动化部署和运维容器应用，整个生命周期都在容器服务内一站式完成。</li>
+<li>通过Web界面轻松实现集群节点和工作负载的扩容和缩容，自由组合策略以应对多变的突发浪涌。</li>
+<li>通过Web界面一键完成Kubernetes集群的升级。</li>
+<li>深度集成应用服务网格和Helm标准模板，真正实现开箱即用。</li>
+</ul>
+<p><strong>2）高性能</strong><br>
+基于在计算、网络、存储、异构等方面多年的行业技术积累，提供业界领先的高性能云容器引擎，支撑您业务的高并发、大规模场景。</p>
+<ul>
+<li>采用高性能裸金属NUMA架构和高速IB网卡，AI计算性能提升3-5倍以上。</li>
+</ul>
+<p><strong>3）安全可靠</strong></p>
+<ul>
+<li><strong>高可靠</strong>：集群控制面支持3 Master HA高可用，3个Master节点可以处于不同可用区，保障您的业务高可用。集群内节点和工作负载支持跨可用区（AZ）部署，帮助您轻松构建多活业务架构，保证业务系统在主机故障、机房中断、自然灾害等情况下可持续运行，获得生产环境的高稳定性，实现业务系统零中断。</li>
+<li><strong>高安全</strong>：私有集群，完全由用户掌控，并深度整合IAM和Kubernetes RBAC能力，支持用户在界面为子用户设置不同的RBAC权限。</li>
+</ul>
+<p><strong>4）开放兼容</strong><br>
+云容器引擎在Docker技术的基础上，为容器化的应用提供部署运行、资源调度、服务发现和动态伸缩等一系列完整功能，提高了大规模容器集群管理的便捷性。</p>
+<p>云容器引擎基于业界主流的Kubernetes实现，完全兼容Kubernetes/Docker社区原生版本，与社区最新版本保持紧密同步，完全兼容Kubernetes API和kubectl。</p>
+<p><strong>对比项：自建kubernetes集群 vs 云容器引擎</strong></p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th align="left">对比项</th>
+<th align="left">自建kubernetes集群</th>
+<th align="left">云容器引擎</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>易用性</strong></td>
+<td align="left">自建kubernetes集群管理基础设施通常涉及安装、操作、扩展自己的集群管理软件、配置管理系统和监控解决方案，管理复杂。每次升级集群的过程都是巨大的调整，带来繁重的运维负担。</td>
+<td align="left">简化集群管理，简单易用借助云容器引擎，您可以一键创建和升级Kubernetes容器集群，无需自行搭建Docker和Kubernetes集群。您可以通过云容器引擎自动化部署和一站式运维容器应用，使得应用的整个生命周期都在容器服务内高效完成。您可以通过云容器引擎轻松使用深度集成的应用服务网格和Helm标准模板，真正实现开箱即用。您只需启动容器集群，并指定想要运行的任务，云容器引擎帮您完成所有的集群管理工作，让您可以集中精力开发容器化的应用程序。</td>
+</tr>
+<tr>
+<td align="left"><strong>可扩展性</strong></td>
+<td align="left">自建kubernetes集群需要根据业务流量情况和健康情况人工确定容器服务的部署，可扩展性差。</td>
+<td align="left">灵活集群托管，轻松实现扩缩容云容器引擎可以根据资源使用情况轻松实现集群节点和工作负载的自动扩容和缩容，并可以自由组合多种弹性策略，以应对业务高峰期的突发流量浪涌。</td>
+</tr>
+<tr>
+<td align="left"><strong>可靠性</strong></td>
+<td align="left">自建kubernetes集群多采用单控制节点，一旦出现故障，集群和业务将不可使用。</td>
+<td align="left">服务高可用创建集群时若“高可用”选项配置为“是”，集群将创建3个Master节点，在单个控制节点发生故障时，集群仍然可用，从而保障您的业务高可用。</td>
+</tr>
+<tr>
+<td align="left"><strong>高效性</strong></td>
+<td align="left">自建kubernetes集群需要自行搭建镜像仓库或使用第三方镜像仓库，镜像拉取方式多采用串行传输，效率低。</td>
+<td align="left">镜像快速部署，业务持续集成云容器引擎配合容器镜像服务提供容器自动化交付流水线，您无需编写Dockerfile与Kubernetes Manifests，基于ContainerOps流水线模板可以自定义企业级容器DevOps流程，镜像拉取方式采用并行传输，大幅提升容器交付效率。</td>
+</tr>
+<tr>
+<td align="left"><strong>成本</strong></td>
+<td align="left">自建kubernetes集群需要投入资金构建、安装、运维、扩展自己的集群管理基础设施，成本开销大。</td>
+<td align="left">云容器引擎成本低您只需支付用于存储和运行应用程序的基础设施资源（例如云服务器、云硬盘、弹性IP/带宽、负载均衡等）费用和容器集群控制节点费用。</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p><strong>2、云容器引擎对比自建Kubernetes集群</strong><br>
+（此处原文无具体图表，保留占位）</p>
+<p><strong>3、容器的优势</strong></p>
+<p>Docker使用Google公司推出的Go语言进行开发实现，基于Linux内核的cgroup，namespace，以及AUFS类的Union FS等技术，对进程进行封装隔离，属于操作系统层面的虚拟化技术。由于隔离的进程独立于宿主和其它的隔离的进程，因此也称其为容器。</p>
+<p>Docker在容器的基础上，进行了进一步的封装，从文件系统、网络互联到进程隔离等，极大的简化了容器的创建和维护。</p>
+<p>传统虚拟机技术是虚拟出一套硬件后，在其上运行一个完整操作系统，在该系统上再运行所需应用进程；而容器内的应用进程直接运行于宿主的内核，容器内没有自己的内核，而且也没有进行硬件虚拟。因此使得Docker技术比虚拟机技术更为轻便、快捷。</p>
+<p>作为一种新兴的虚拟化方式，Docker跟虚拟机相比具有众多的优势：</p>
+<p><strong>1）更高效的利用系统资源</strong><br>
+由于容器不需要进行硬件虚拟以及运行完整操作系统等额外开销，Docker对系统资源的利用率更高。无论是应用执行速度、内存损耗或者文件存储速度，都要比传统虚拟机技术更高效。因此，相比虚拟机技术，一个相同配置的主机，往往可以运行更多数量的应用。</p>
+<p><strong>2）更快速的启动时间</strong><br>
+传统的虚拟机技术启动应用服务往往需要数分钟，而Docker容器应用，由于直接运行于宿主内核，无需启动完整的操作系统，因此可以做到秒级、甚至毫秒级的启动时间。大大的节约了开发、测试、部署的时间。</p>
+<p><strong>3）一致的运行环境</strong><br>
+开发过程中一个常见的问题是环境一致性问题。由于开发环境、测试环境、生产环境不一致，导致有些bug并未在开发过程中被发现。而Docker的镜像提供了除内核外完整的运行时环境，确保了应用运行环境一致性。</p>
+<p><strong>4）持续交付和部署</strong><br>
+对开发和运维（DevOps）人员来说，最希望的就是一次创建或配置，可以在任意地方正常运行。<br>
+使用Docker可以通过定制应用镜像来实现持续集成、持续交付、部署。开发人员可以通过Dockerfile来进行镜像构建，并结合持续集成（Continuous Integration）系统进行集成测试，而运维人员则可以直接在生产环境中快速部署该镜像，甚至结合持续部署（Continuous Delivery/Deployment） 系统进行自动部署。<br>
+而且使用Dockerfile使镜像构建透明化，不仅开发团队可以理解应用运行环境，也方便运维团队理解应用运行所需条件，帮助更好的生产环境中部署该镜像。</p>
+<p><strong>5）更轻松的迁移</strong><br>
+由于Docker确保了执行环境的一致性，使得应用的迁移更加容易。Docker可以在很多平台上运行，无论是物理机、虚拟机、公有云、私有云，甚至是笔记本，其运行结果是一致的。因此用户可以很轻易的将在一个平台上运行的应用，迁移到另一个平台上，而不用担心运行环境的变化导致应用无法正常运行的情况。</p>
+<p><strong>6）更轻松的维护和扩展</strong><br>
+Docker使用的分层存储以及镜像的技术，使得应用重复部分的复用更为容易，也使得应用的维护更新更加简单，基于基础镜像进一步扩展镜像也变得非常简单。此外，Docker团队同各个开源项目团队一起维护了一大批高质量的官方镜像，既可以直接在生产环境使用，又可以作为基础进一步定制，大大的降低了应用服务的镜像制作成本。</p></div>
+<div style="font-size:small;margin-top:8px;float:right;"></div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://sin210.github.io">Frostnova</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行 "+diffDay+" 天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.disabled=true;
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","sin210/sin210.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+
+
+</script>
+<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekTOC.js'></script><script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>
+
+</html>

@@ -35,6 +35,7 @@
 - 采用高性能裸金属NUMA架构和高速IB网卡，AI计算性能提升3-5倍以上。
 
 **3）安全可靠**
+![demo3](https://support.huaweicloud.com/productdesc-cce/zh-cn_image_0000001169001672.png)
 - **高可靠**：集群控制面支持3 Master HA高可用，3个Master节点可以处于不同可用区，保障您的业务高可用。集群内节点和工作负载支持跨可用区（AZ）部署，帮助您轻松构建多活业务架构，保证业务系统在主机故障、机房中断、自然灾害等情况下可持续运行，获得生产环境的高稳定性，实现业务系统零中断。
 - **高安全**：私有集群，完全由用户掌控，并深度整合IAM和Kubernetes RBAC能力，支持用户在界面为子用户设置不同的RBAC权限。
 
@@ -88,6 +89,7 @@ Docker使用的分层存储以及镜像的技术，使得应用重复部分的�
 # 1.2. 应用场景
 
 ## 1.2.1. 基础设施与容器应用管理
+![demo4](https://support.huaweicloud.com/productdesc-cce-autopilot/zh-cn_image_0000002050726225.png)
 
 CCE集群支持管理X86资源池和ARM资源池，能方便的创建Kubernetes集群、部署您的容器化应用，以及方便的管理和维护。
 
@@ -119,7 +121,7 @@ CCE集群支持管理X86资源池和ARM资源池，能方便的创建Kubernetes�
 *   **A. 自由灵活**：支持多种策略配置，业务流量达到扩容指标，秒级触发容器扩容操作。
 *   **B. 高可用**：自动检测伸缩组中实例运行状况，启用新实例替换不健康实例，保证业务健康可用。
 *   **C. 低成本**：只按照实际用量收取云服务器费用。
-![demo3](https://support.huaweicloud.com/usermanual-cce/zh-cn_image_0000001290111529.png)
+![demo5](https://support.huaweicloud.com/usermanual-cce/zh-cn_image_0000001290111529.png)
 **建议搭配使用：** HPA（Horizontal Pod Autoscaling）+ CA（Cluster AutoScaling）
 
 **技术原理说明：**
@@ -204,6 +206,7 @@ CCE集群支持管理X86资源池和ARM资源池，能方便的创建Kubernetes�
 
 **建议搭配使用：** 弹性云服务器ECS + 云专线DC + 虚拟专用网络VPN + 容器镜像服务SWR
 
+![demo6](https://res-static.hc-cdn.cn/cloudbu-site/china/zh-cn/yunying/SWR-2023/SWR-scene1-1101.png)
 ## 1.2.6. 高性能调度
 
 CCE通过集成Volcano提供高性能计算能力。
@@ -221,5 +224,35 @@ Volcano在Kubernetes之上抽象了一个批量计算的通用基础层，向下
 用户在使用集群资源的时候通常会涉及到资源隔离与资源共享，Kubernetes中没有队列的支持，所以它在多个用户或多个部门共享一个机器时无法做资源共享。但不管在HPC还是大数据领域中，通过队列进行资源共享都是基本的需求。
 
 在通过队列做资源共享时，我们提供了多种机制。可以为队列设置weight值，集群通过计算该队列weight值占所有weight总和的比例来给队列划分资源；另外也可以为队列设置资源的Capability值，来确定该队列能够使用的资源上限。
+![demo7](https://support.huaweicloud.com/usermanual-cce/zh-cn_image_0000002277956749.png)
 
 例如下图中，通过这两个队列去共享整个集群的资源，一个队列获得40%的资源，另一个队列获得60%的资源，这样可以把两个不同的队列映射到不同的部门或者是不同的项目中。并且在一个队列里如果有多余的空闲资源，可以把这些空闲资源分配给另外一个队列里面的作业去使用。
+# 3、多种高级调度策略
+
+当用户向 Kubernetes 申请容器所需的计算资源（如 CPU、Memory、GPU 等）时，调度器负责挑选出满足各项规格要求的节点来部署这些容器。通常，满足各项要求的节点并非唯一，且水位（节点已有负载）各不相同，不同的分配方式最终得到的分配率存在差异，因此，调度器的一项核心任务就是以最终资源利用率最优的目标从众多候选机器中挑出最合适的节点。
+![demo8](https://support.huaweicloud.com/usermanual-cce/zh-cn_image_0000002504031430.png)
+
+下图为 Volcano scheduler 调度流程，首先将 API server 中的 Pod、PodGroup 信息加载到 scheduler cache 中。Scheduler 周期被称为 session，每个 scheduler 周期会经历 OpenSession，调用 Action，CloseSession 三个阶段。其中 OpenSession 阶段加载用户配置的 scheduler plugin 中实现的调度策略；调用 Action 阶段逐一调用配置的 action 以及在 OpenSession 阶段加载的调度策略；CloseSession 为清理阶段。
+
+Volcano scheduler 通过插件方式提供了多种调度 Action（例如 enqueue，allocate，preempt，reclaim，backfill）以及调度策略（例如 gang，priority，drf，proportion，binpack 等），用户可以根据实际业务需求进行配置。通过实现 Scheduler 提供的接口也可以方便灵活的进行定制化开发。
+
+# 4、高精度资源调度
+
+Volcano 在支持 AI，大数据等作业的时候提供了高精度的资源调度策略，例如在深度学习场景下计算效率非常重要。以 TensorFlow 计算为例，配置“ps”和“worker”之间的亲和性，以及“ps”与“ps”之间的反亲和性，可使“ps”和“worker”尽量调度到同一台节点上，从而提升“ps”和“worker”之间进行网络和数据交互的效率，进而提升计算效率。然而 Kubernetes 默认调度器在调度 Pod 过程中，仅会检查 Pod 与现有集群下所有已经处于运行状态 Pod 的亲和性和反亲和性配置是否冲突或吻合，并不会考虑接下来可能会调度的 Pod 造成的影响。
+
+Volcano 提供的 Task-topology 算法是一种根据 Job 内 task 之间亲和性和反亲和性配置计算 task 优先级和 Node 优先级的算法。通过在 Job 内配置 task 之间的亲和性和反亲和性策略，并使用 task-topology 算法，可优先将具有亲和性配置的 task 调度到同一个节点上，将具有反亲和性配置的 Pod 调度到不同的节点上。同样是处理亲和性和反亲和性配置对 Pod 调度的影响，task-topology 算法与 Kubernetes 默认调度器处理的不同点在于，task-topology 将待调度的 Pods 作为一个整体进行亲和性和反亲和性考虑，在批量调度 Pod 时，考虑未调度 Pod 之间的亲和性和反亲和性影响，并通过优先级施加到 Pod 的调度进程中。
+
+## 优势
+
+CCE 通过集成 Volcano，在高性能计算、大数据、AI 等领域有如下优势：
+
+- 多种类型作业混合部署：支持 AI、大数据、HPC 作业类型混合部署。
+![demo9](https://res-static.hc-cdn.cn/cloudbu-site/china/zh-cn/yunying/ELB-2023/changjing/elb_scene1-CN-1024.svg)
+- 多队列场景调度优化：支持多队列用于多租资源共享与分组规划，支持优先级与分时复用。
+- 多种高级调度策略：支持 gang-scheduling、公平调度、资源抢占、GPU 拓扑等高级调度策略。
+- 多任务模板：支持单一 Job 多任务模板定义，打破 Kubernetes 原生资源束缚，Volcano Job 描述多种作业类型（Tensorflow、MPI、PyTorch 等）。
+- 作业扩展插件配置：在提交作业、创建 Pod 等多个阶段，Controller 支持配置插件用来执行自定义的环境准备和清理的工作，比如常见的 MPI 作业，在提交前就需要配置 SSH 插件，用来完成 Pod 资源的 SSH 信息配置。
+
+## 建议搭配使用
+
+GPU 加速云服务器 + 弹性负载均衡 ELB + 对象存储服务 OBS
